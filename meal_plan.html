@@ -1,0 +1,1273 @@
+<!-- Weekly Meal Plan: Week of June 8, 2026 -->
+<meta charset="UTF-8">
+<style>
+  :root {
+    --bg: #f7f1e6;
+    --bg-card: #fffaf2;
+    --ink: #2a2521;
+    --ink-soft: #5a4e44;
+    --rule: #d9cdb8;
+    --terracotta: #b85432;
+    --terracotta-deep: #8e3e22;
+    --olive: #5a6b3a;
+    --olive-deep: #3f4a28;
+    --gold: #c89942;
+    --blue: #3a6280;
+    --blue-deep: #234561;
+    --ghost: #ebe1cb;
+    --shadow: 0 1px 0 rgba(42,37,33,0.04), 0 8px 24px -12px rgba(42,37,33,0.18);
+    --serif: "Fraunces", "Cormorant Garamond", Georgia, serif;
+    --sans: "Sohne", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  * { box-sizing: border-box; }
+
+  body, .meal-planner {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .meal-planner { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+
+  .mast {
+    border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 24px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .mast-title {
+    font-family: var(--serif); font-weight: 400; margin: 0;
+    font-size: clamp(36px, 5vw, 58px); line-height: 0.95; letter-spacing: -0.02em;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+  .mast-title em {
+    font-style: italic; color: var(--terracotta);
+    font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+  }
+  .mast-meta {
+    text-align: right; font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--ink-soft); line-height: 1.6;
+  }
+  .mast-meta strong { color: var(--ink); display: block; font-weight: 500; }
+
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 28px;
+    border-bottom: 1px solid var(--rule); overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    background: transparent; border: none; padding: 14px 18px;
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    color: var(--ink-soft); cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all 0.15s ease; white-space: nowrap; letter-spacing: 0.02em;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--terracotta-deep); border-bottom-color: var(--terracotta); }
+  .tab-num {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--ghost); margin-right: 6px; vertical-align: 1px;
+  }
+  .tab.active .tab-num { color: var(--terracotta); }
+
+  .panel { display: none; animation: fade 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  .overview-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+  @media (max-width: 760px) { .overview-grid { grid-template-columns: 1fr; } }
+
+  .lede {
+    font-family: var(--serif); font-size: 22px; line-height: 1.35;
+    color: var(--ink); font-weight: 300; margin: 0 0 20px;
+    font-variation-settings: "opsz" 60;
+  }
+  .lede em { color: var(--terracotta); font-style: italic; }
+
+  .week-strip {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 24px 0;
+  }
+  @media (max-width: 640px) { .week-strip { grid-template-columns: repeat(2, 1fr); } }
+
+  .day-pill {
+    background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 14px 12px; cursor: pointer; transition: all 0.15s; text-align: left;
+  }
+  .day-pill:hover { border-color: var(--terracotta); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .day-pill .dow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--terracotta); margin-bottom: 8px;
+  }
+  .day-pill .dish { font-family: var(--serif); font-size: 15px; line-height: 1.25; font-weight: 400; }
+  .day-pill .meta {
+    font-size: 11px; color: var(--ink-soft); margin-top: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .day-pill .badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; padding: 2px 6px; border-radius: 3px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .badge.freezer { background: var(--blue); color: white; }
+  .badge.fresh { background: var(--olive); color: white; }
+
+  .callout {
+    background: var(--bg-card); border-left: 3px solid var(--olive);
+    padding: 16px 18px; margin: 20px 0; border-radius: 0 4px 4px 0;
+  }
+  .callout h4 {
+    margin: 0 0 6px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--olive-deep); font-weight: 500;
+  }
+  .callout p { margin: 0; font-size: 14px; }
+  .callout.warn { border-left-color: var(--gold); }
+  .callout.warn h4 { color: var(--gold); }
+  .callout.freezer { border-left-color: var(--blue); }
+  .callout.freezer h4 { color: var(--blue-deep); }
+
+  .sidebar-card {
+    background: var(--bg-card); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 20px;
+  }
+  .sidebar-card h3 { font-family: var(--serif); font-weight: 400; font-size: 20px; margin: 0 0 12px; }
+  .sidebar-card p { font-size: 13px; color: var(--ink-soft); }
+  .sidebar-card ul { padding-left: 18px; font-size: 13px; }
+  .sidebar-card li { margin-bottom: 6px; }
+
+  .perishable-input {
+    background: var(--bg); border: 1px dashed var(--rule); border-radius: 6px;
+    padding: 14px; margin-top: 12px;
+  }
+  .perishable-input textarea {
+    width: 100%; border: 1px solid var(--rule); border-radius: 4px;
+    padding: 8px; font-family: var(--sans); font-size: 13px;
+    resize: vertical; min-height: 60px; background: white;
+  }
+  .perishable-input button {
+    background: var(--olive); color: white; border: none;
+    padding: 8px 14px; border-radius: 4px;
+    font-family: var(--sans); font-size: 12px; font-weight: 500;
+    margin-top: 8px; cursor: pointer; letter-spacing: 0.03em;
+  }
+  .perishable-input button:hover { background: var(--olive-deep); }
+  .perishable-output { margin-top: 10px; font-size: 13px; color: var(--olive-deep); line-height: 1.5; }
+
+  .recipe-layout { display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-layout { grid-template-columns: 1fr; } }
+
+  .recipe-nav {
+    display: flex; flex-direction: column; gap: 2px;
+    border-right: 1px solid var(--rule); padding-right: 16px;
+  }
+  @media (max-width: 760px) {
+    .recipe-nav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 0 12px; }
+  }
+  .recipe-nav-item {
+    background: transparent; border: none; text-align: left;
+    padding: 12px 10px; cursor: pointer; border-radius: 4px;
+    transition: all 0.15s; color: var(--ink-soft);
+    border-left: 2px solid transparent; min-width: 0;
+  }
+  @media (max-width: 760px) { .recipe-nav-item { border-left: none; border-bottom: 2px solid transparent; min-width: 140px; } }
+  .recipe-nav-item:hover { background: var(--bg-card); color: var(--ink); }
+  .recipe-nav-item.active { color: var(--terracotta-deep); border-left-color: var(--terracotta); background: var(--bg-card); }
+  @media (max-width: 760px) { .recipe-nav-item.active { border-left-color: transparent; border-bottom-color: var(--terracotta); } }
+  .recipe-nav-item .nav-dow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 4px; display: block;
+  }
+  .recipe-nav-item .nav-dish { font-family: var(--serif); font-size: 14px; line-height: 1.2; }
+  .recipe-nav-item .nav-icon {
+    display: inline-block; width: 6px; height: 6px;
+    border-radius: 50%; margin-left: 5px; vertical-align: 2px;
+  }
+  .nav-icon.freezer { background: var(--blue); }
+
+  .recipe { display: none; }
+  .recipe.active { display: block; animation: fade 0.25s ease; }
+
+  .recipe-head { border-bottom: 1px solid var(--rule); padding-bottom: 16px; margin-bottom: 20px; }
+  .recipe-head .eyebrow {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--terracotta); margin-bottom: 8px;
+  }
+  .recipe-head h2 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(28px, 4vw, 38px); line-height: 1.05;
+    margin: 0 0 12px; letter-spacing: -0.01em;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+  .recipe-head .source { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+  .recipe-stats { display: flex; gap: 24px; margin-top: 14px; flex-wrap: wrap; }
+  .stat { font-size: 12px; color: var(--ink-soft); }
+  .stat strong {
+    color: var(--ink); font-weight: 500; display: block;
+    font-size: 14px; font-family: var(--serif);
+  }
+
+  .recipe-body { display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-body { grid-template-columns: 1fr; } }
+
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--terracotta); margin: 0 0 12px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--rule);
+  }
+
+  .ingredients ul { list-style: none; padding: 0; margin: 0; }
+  .ingredients li {
+    padding: 6px 0; border-bottom: 1px dotted var(--rule);
+    font-size: 14px; line-height: 1.4;
+  }
+  .ingredients li:last-child { border-bottom: none; }
+  .ingredients .amount {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    color: var(--terracotta-deep); margin-right: 8px; font-weight: 500;
+  }
+  .ingredients .pantry-note {
+    font-size: 11px; color: var(--olive); font-style: italic; margin-left: 4px;
+  }
+
+  .steps { counter-reset: step; }
+  .step {
+    counter-increment: step; padding: 12px 0 12px 36px;
+    position: relative; font-size: 14.5px; line-height: 1.55;
+    border-bottom: 1px solid var(--rule);
+  }
+  .step:last-child { border-bottom: none; }
+  .step::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute; left: 0; top: 12px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--terracotta); font-weight: 500; letter-spacing: 0.05em;
+  }
+
+  .kid-note, .ahead-note, .freezer-note, .science-note {
+    background: var(--bg-card); border: 1px solid var(--rule); border-radius: 4px;
+    padding: 14px 16px; margin-top: 20px; font-size: 13.5px;
+  }
+  .kid-note { border-left: 3px solid var(--gold); }
+  .ahead-note { border-left: 3px solid var(--olive); }
+  .freezer-note { border-left: 3px solid var(--blue); }
+  .science-note { border-left: 3px solid var(--terracotta); }
+  .kid-note strong, .ahead-note strong, .freezer-note strong, .science-note strong {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    display: block; margin-bottom: 6px;
+  }
+  .kid-note strong { color: var(--gold); }
+  .ahead-note strong { color: var(--olive-deep); }
+  .freezer-note strong { color: var(--blue-deep); }
+  .science-note strong { color: var(--terracotta-deep); }
+
+  .grocery-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;
+  }
+  .grocery-section {
+    background: var(--bg-card); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .grocery-section h3 {
+    font-family: var(--serif); font-weight: 400; font-size: 19px;
+    margin: 0 0 12px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .grocery-section h3 .count {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+    color: var(--terracotta); letter-spacing: 0.1em;
+  }
+  .grocery-section ul { list-style: none; padding: 0; margin: 0; }
+  .grocery-section li {
+    padding: 8px 0; font-size: 13.5px;
+    display: flex; align-items: flex-start; gap: 10px;
+    line-height: 1.4; cursor: pointer; user-select: none;
+  }
+  .grocery-section li.checked {
+    color: var(--ink-soft); text-decoration: line-through;
+    text-decoration-thickness: 1px; opacity: 0.55;
+  }
+  .grocery-section .check-box {
+    width: 14px; height: 14px; border: 1.5px solid var(--ink-soft);
+    border-radius: 3px; flex-shrink: 0; margin-top: 3px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .grocery-section li.checked .check-box { background: var(--terracotta); border-color: var(--terracotta); }
+  .grocery-section li.checked .check-box::after {
+    content: '\2713'; color: white; font-size: 11px; line-height: 1;
+  }
+  .item-amt {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--ink-soft); display: block; margin-top: 1px;
+  }
+  .tag {
+    display: inline-block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; padding: 2px 6px; border-radius: 3px;
+    margin-left: 6px; letter-spacing: 0.06em; vertical-align: 1px;
+    text-transform: uppercase;
+  }
+  .tag.d1 { background: var(--olive); color: white; }
+  .tag.d2 { background: var(--blue); color: white; }
+  .tag.specialty { background: var(--ghost); color: var(--ink-soft); }
+
+  .grocery-note {
+    background: var(--bg-card); border: 1px solid var(--rule);
+    border-left: 3px solid var(--terracotta); border-radius: 0 4px 4px 0;
+    padding: 16px 18px; margin-bottom: 24px; font-size: 13.5px;
+  }
+  .grocery-note strong {
+    display: block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--terracotta-deep); margin-bottom: 6px;
+  }
+  .grocery-note .legend {
+    margin-top: 8px;
+  }
+  .grocery-note .legend span {
+    margin-right: 14px; font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+  .grocery-note .legend .dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 2px; margin-right: 4px; vertical-align: 1px;
+  }
+  .grocery-note .dot.d1 { background: var(--olive); }
+  .grocery-note .dot.d2 { background: var(--blue); }
+
+  .prep-timeline { position: relative; padding-left: 28px; }
+  .prep-timeline::before {
+    content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px;
+    width: 1px; background: var(--rule);
+  }
+  .prep-event { position: relative; margin-bottom: 28px; }
+  .prep-event::before {
+    content: ''; position: absolute; left: -25px; top: 6px;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--terracotta);
+  }
+  .prep-event.start::before { background: var(--terracotta); }
+  .prep-event.delivery::before {
+    background: var(--blue); border-color: var(--blue);
+    border-radius: 2px;
+  }
+  .prep-event h3 {
+    font-family: var(--serif); font-weight: 400; font-size: 22px;
+    margin: 0 0 4px; line-height: 1.2;
+  }
+  .prep-event.delivery h3 { color: var(--blue-deep); }
+  .prep-event .when {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--terracotta); margin-bottom: 12px;
+  }
+  .prep-event.delivery .when { color: var(--blue); }
+  .prep-event .duration {
+    color: var(--ink-soft); margin-left: 6px;
+    text-transform: none; letter-spacing: 0;
+  }
+  .prep-event ul { list-style: none; padding: 0; margin: 0; }
+  .prep-event li {
+    padding: 6px 0 6px 18px; font-size: 14px;
+    position: relative; line-height: 1.5;
+  }
+  .prep-event li::before {
+    content: '\2192'; position: absolute; left: 0;
+    color: var(--terracotta);
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  }
+  .prep-event.delivery li::before { color: var(--blue); }
+  .prep-event li.for {
+    color: var(--ink-soft); font-size: 12px;
+    padding-top: 0; padding-bottom: 4px; font-style: italic;
+  }
+  .prep-event li.for::before { display: none; }
+
+  .pantry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .pantry-grid { grid-template-columns: 1fr; } }
+  .pantry-section {
+    background: var(--bg-card); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .pantry-section h3 { font-family: var(--serif); font-size: 19px; margin: 0 0 12px; font-weight: 400; }
+  .pantry-section ul { padding-left: 18px; font-size: 13.5px; line-height: 1.7; }
+
+  @media print {
+    body { background: white; }
+    .meal-planner { padding: 20px; max-width: none; }
+    .tabs { display: none; }
+    .panel { display: block !important; page-break-before: always; }
+    .panel:first-of-type { page-break-before: avoid; }
+    .recipe { display: block !important; page-break-before: always; }
+    .recipe-nav { display: none; }
+    .recipe-layout { grid-template-columns: 1fr; }
+    .day-pill { box-shadow: none; }
+  }
+</style>
+
+<div class="meal-planner">
+  <header class="mast">
+    <h1 class="mast-title">Build the <em>Freezer</em></h1>
+    <div class="mast-meta">
+      <strong>Mon 6/8 &mdash; Fri 6/12, 2026</strong>
+      Family of four &middot; NW DC
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview"><span class="tab-num">01</span>Overview</button>
+    <button class="tab" data-tab="recipes"><span class="tab-num">02</span>Recipes</button>
+    <button class="tab" data-tab="grocery"><span class="tab-num">03</span>Grocery List</button>
+    <button class="tab" data-tab="prep"><span class="tab-num">04</span>Prep Schedule</button>
+    <button class="tab" data-tab="pantry"><span class="tab-num">05</span>Pantry &amp; Notes</button>
+  </nav>
+
+  <section class="panel active" data-panel="overview">
+    <div class="overview-grid">
+      <div>
+        <p class="lede">Three of the five nights are <em>freezer-friendly</em> &mdash; cook a double batch, eat one portion, stash 2&ndash;4 future-week meals in the freezer. Two fresh-cook nights round it out: a Japanese chicken katsu (using last week's leftover cabbage) and a quick shrimp stew.</p>
+
+        <div class="week-strip">
+          <div class="day-pill" onclick="goToRecipe(0)">
+            <div class="dow">Mon 6/8</div>
+            <div class="dish">Chicken Katsu with Cabbage Slaw</div>
+            <div class="meta">30 min &middot; stovetop</div>
+            <div class="badges"><span class="badge fresh">Fresh</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(1)">
+            <div class="dow">Tue 6/9</div>
+            <div class="dish">Pasta e Fagiole</div>
+            <div class="meta">15 min day-of &middot; stovetop</div>
+            <div class="badges"><span class="badge freezer">Freezer</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(2)">
+            <div class="dow">Wed 6/10</div>
+            <div class="dish">Greek Pork Meatballs in Tomato Sauce</div>
+            <div class="meta">25 min &middot; stovetop</div>
+            <div class="badges"><span class="badge freezer">Freezer</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(3)">
+            <div class="dow">Thu 6/11</div>
+            <div class="dish">Lemony Shrimp &amp; Bean Stew</div>
+            <div class="meta">30 min &middot; stovetop</div>
+            <div class="badges"><span class="badge fresh">Fresh</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(4)">
+            <div class="dow">Fri 6/12</div>
+            <div class="dish">Spicy Pork &amp; Black Bean Chili</div>
+            <div class="meta">10 min day-of &middot; stovetop</div>
+            <div class="badges"><span class="badge freezer">Freezer</span></div>
+          </div>
+        </div>
+
+        <div class="callout freezer">
+          <h4>The freezer strategy</h4>
+          <p>Sunday's prep session is ~2 hours, mostly hands-off simmering &mdash; but afterwards, you'll have <em>8&ndash;10 additional meal portions in the freezer</em> for future weeks. Pasta e fagiole base, pork chili, and shaped meatballs all freeze beautifully. Tue and Fri are 10&ndash;15 min reheats. Strategic batch cooking, not joyless meal-prep Sunday.</p>
+        </div>
+
+        <div class="callout warn">
+          <h4>Heavy Sunday, light week</h4>
+          <p>Sunday prep is ~2 hours, mostly hands-off simmering for the pasta e fagiole and chili. After that, every weeknight is 10&ndash;30 min active. Mon (katsu) is the longest fresh-cook night at 30 min; Tue and Fri are 15 and 10 min reheats.</p>
+        </div>
+
+        <div class="callout">
+          <h4>Two deliveries this week</h4>
+          <p>Friday's shrimp is the only fragile ingredient that won't hold from Sunday. <strong>Delivery 1 (Sun)</strong> covers everything else; <strong>Delivery 2 (Thu)</strong> is just shrimp + fresh parsley. See the Grocery tab for the split, or order frozen shrimp Sun and thaw Wed night to skip Delivery 2 entirely.</p>
+        </div>
+
+        <div class="callout">
+          <h4>About this week's books</h4>
+          <p>Recipes are pulled from four of the five books on the shelf: <em>Easy Weeknight Dinners</em> (Mon &amp; Thu), Music's <em>Where Cooking Begins</em> (Tue &mdash; new this week), Milk Street's <em>Tuesday Nights Mediterranean</em> (Wed), and Clark's <em>Dinner</em> (Fri). Nosrat's <em>Salt Fat Acid Heat</em> sits this week out &mdash; her roast chicken needs a 1 hr 20 min cook window that didn't fit. Saving it for a Sunday-cook week.</p>
+        </div>
+      </div>
+
+      <aside>
+        <div class="sidebar-card">
+          <h3>Got perishables to use up?</h3>
+          <p>Tell me what's about to spoil and I'll rework next week around it.</p>
+          <div class="perishable-input">
+            <textarea id="perishables" placeholder="e.g., half a bunch of cilantro, 1 zucchini, 6 oz mushrooms&hellip;"></textarea>
+            <button onclick="logPerishables()">Note it for next week</button>
+            <div class="perishable-output" id="perish-out"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-card" style="margin-top:20px">
+          <h3>The freezer haul, by the numbers</h3>
+          <ul>
+            <li><strong>Pasta e fagiole base:</strong> 4&ndash;6 portions for the freezer</li>
+            <li><strong>Pork &amp; black bean chili:</strong> 6&ndash;8 portions Sunday (you'll thaw 4&ndash;5 for Fri; rest stays frozen)</li>
+            <li><strong>Raw shaped meatballs:</strong> 6 portions for the freezer</li>
+            <li><strong>Total:</strong> ~12 future-week meal components</li>
+          </ul>
+          <p style="margin-top:10px">Each labeled with date and contents. Pasta e fagiole and chili keep 3 months; raw meatballs keep 2 months. Reheat instructions on each recipe page.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="recipes">
+    <div class="recipe-layout">
+      <nav class="recipe-nav" id="recipe-nav">
+        <button class="recipe-nav-item active" data-recipe="0">
+          <span class="nav-dow">Mon 6/8</span>
+          <span class="nav-dish">Chicken Katsu</span>
+        </button>
+        <button class="recipe-nav-item" data-recipe="1">
+          <span class="nav-dow">Tue 6/9</span>
+          <span class="nav-dish">Pasta e Fagiole<span class="nav-icon freezer"></span></span>
+        </button>
+        <button class="recipe-nav-item" data-recipe="2">
+          <span class="nav-dow">Wed 6/10</span>
+          <span class="nav-dish">Greek Pork Meatballs<span class="nav-icon freezer"></span></span>
+        </button>
+        <button class="recipe-nav-item" data-recipe="3">
+          <span class="nav-dow">Thu 6/11</span>
+          <span class="nav-dish">Lemony Shrimp Stew</span>
+        </button>
+        <button class="recipe-nav-item" data-recipe="4">
+          <span class="nav-dow">Fri 6/12</span>
+          <span class="nav-dish">Pork &amp; Black Bean Chili<span class="nav-icon freezer"></span></span>
+        </button>
+      </nav>
+
+      <div class="recipe-content">
+
+        <article class="recipe active" data-recipe="0">
+          <div class="recipe-head">
+            <div class="eyebrow">Monday &middot; Japanese</div>
+            <h2>Chicken Katsu<br>with Cabbage Slaw</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Kay Chun.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>30 min</strong>total</div>
+              <div class="stat"><strong>30 min</strong>active (mostly assembly)</div>
+              <div class="stat"><strong>Stovetop</strong>cast iron or heavy skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Tonkatsu sauce (make ahead Sunday)</h4>
+                <ul>
+                  <li><span class="amount">6 Tbsp</span>ketchup</li>
+                  <li><span class="amount">6 Tbsp</span>Worcestershire sauce</li>
+                  <li><span class="amount">4 tsp</span>unsulfured molasses</li>
+                  <li><span class="amount">2 tsp</span>low-sodium soy sauce <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2 tsp</span>granulated sugar</li>
+                  <li><span class="amount">&frac14; tsp</span>peeled, grated fresh ginger</li>
+                  <li><span class="amount">&frac18; tsp</span>ground cloves</li>
+                </ul>
+
+                <h4 class="section-label" style="margin-top:20px">Katsu (Monday night)</h4>
+                <ul>
+                  <li><span class="amount">~1 cup</span>vegetable or canola oil, for frying (depth of &frac13;")</li>
+                  <li><span class="amount">&frac12; cup</span>all-purpose flour <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2</span>large eggs, beaten</li>
+                  <li><span class="amount">1&frac12; cups</span>panko breadcrumbs (about 3&frac12; oz)</li>
+                  <li><span class="amount">2</span>boneless skinless chicken breasts (&frac12; lb each), halved crosswise and pounded to &frac14;" thick</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                </ul>
+
+                <h4 class="section-label" style="margin-top:20px">Cabbage salad &amp; serving</h4>
+                <ul>
+                  <li><span class="amount">12 oz</span>finely shredded green cabbage (about 4 packed cups &mdash; uses half a head)</li>
+                  <li><span class="amount">2 Tbsp</span>rice vinegar <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>toasted sesame oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 tsp</span>low-sodium soy sauce <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 tsp</span>granulated sugar</li>
+                  <li><span class="amount">2</span>scallions, thinly sliced</li>
+                  <li><span class="amount">1 tsp</span>toasted sesame seeds <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">pinch</span>kosher salt <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>steamed white rice <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>lemon wedges</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="section-label">Method &mdash; Monday, 30 min</h4>
+              <div class="steps">
+                <div class="step">Start rice (if using). 18 min for jasmine rice in a covered saucepan; longer for brown.</div>
+                <div class="step">Pour oil into a large cast-iron or heavy skillet to a depth of &frac13;". Heat over medium until an instant-read thermometer registers 350&deg;F. (Or test with a piece of bread &mdash; it should sizzle steadily and brown in ~30 seconds.)</div>
+                <div class="step">Set up three wide shallow bowls: flour in one, beaten eggs in the second, panko in the third.</div>
+                <div class="step">Season the 4 chicken cutlets on both sides with salt and pepper. Working with one at a time, dredge in flour (shake off excess), dip in egg (let excess drip off), then press firmly into the panko, coating both sides. Set aside on a clean plate. Repeat with remaining cutlets.</div>
+                <div class="step">Gently lower 2 cutlets into the hot oil. Fry until golden on the underside, about 2 min. Adjust heat to keep oil close to 350&deg;F &mdash; too hot, the breading burns before the chicken cooks; too cold, the breading gets greasy.</div>
+                <div class="step">Flip the cutlets. Fry until golden on the second side and cooked through, another 1&frac12;&ndash;2 min. Transfer to a paper-towel-lined plate and season immediately with a pinch of salt.</div>
+                <div class="step">Fry the remaining 2 cutlets the same way.</div>
+                <div class="step">While the second batch fries, dress the cabbage: in a large bowl, whisk together rice vinegar, sesame oil, soy sauce, sugar, and a pinch of salt until the sugar dissolves. Add the shredded cabbage and sliced scallions; toss well so every shred gets coated. Let sit 2&ndash;3 minutes &mdash; the cabbage softens slightly and absorbs the dressing.</div>
+                <div class="step">Cut each cutlet on the diagonal into thick slices. Plate with a generous mound of the dressed cabbage salad alongside and a small bowl of rice. Sprinkle the cabbage with sesame seeds. Drizzle the chicken with tonkatsu sauce; pass the rest at the table. Serve with lemon wedges.</div>
+              </div>
+
+              <div class="science-note">
+                <strong>The temperature thing</strong>
+                350&deg;F is the goldilocks zone for breaded cutlets &mdash; high enough for fast browning, low enough that the panko stays crisp instead of burning. An instant-read or candy thermometer earns its keep here. If the oil cools too much when you drop cutlets in, the breading absorbs oil and gets soggy; if it spikes, the breading burns brown before the chicken interior is safe. Adjust the burner up and down between batches.
+              </div>
+
+              <div class="ahead-note">
+                <strong>Make ahead (Sunday, 10 min)</strong>
+                Mix the tonkatsu sauce &mdash; it lasts indefinitely in the fridge. Whisk the cabbage-salad dressing (rice vinegar, sesame oil, soy sauce, sugar, salt) in a small jar &mdash; keeps a week. Pound the chicken cutlets thin between sheets of plastic wrap (use the bottom of a heavy skillet or a rolling pin); store covered. Shred the cabbage (12 oz, about 4 cups packed) and store in a container with a damp paper towel &mdash; keeps crisp for 3 days. Slice the scallions and store with the cabbage (or separately). Crack the eggs into a small jar &mdash; will be ready Monday. Monday night is then just dredge, fry, dress the cabbage, plate.
+              </div>
+
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Chicken katsu is a great kid food &mdash; crispy outside, tender inside, no spice. For both kids: cut into small strips for easy hand-eating. The 13-mo will need pieces small enough to gum if no teeth; the panko crust softens when you let it sit a minute. Tonkatsu sauce is fine for the 34-mo (it's sweet-tangy, not spicy) but skip it for the 13-mo &mdash; the soy sauce and Worcestershire make it salty. The dressed cabbage salad is a bit much for the 13-mo &mdash; pull a small amount of cabbage out <em>before</em> dressing and chop it very fine; soft-cooked cabbage or even plain steamed broccoli works better at that age. The 34-mo will likely eat the dressed cabbage; it's mild and slightly sweet.
+              </div>
+            </div>
+          </div>
+        </article>
+
+
+        <article class="recipe" data-recipe="1">
+          <div class="recipe-head">
+            <div class="eyebrow">Tuesday &middot; Italian &middot; Vegetarian-leaning</div>
+            <h2>Pasta e Fagiole<br><span style="font-size:24px;color:var(--blue-deep)">Freezer-friendly</span></h2>
+            <div class="source">From <em>Where Cooking Begins</em> by Carla Lalli Music (2019). Her mother's recipe.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>15 min day-of</strong>(base made Sunday)</div>
+              <div class="stat"><strong>15 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>pot</div>
+              <div class="stat"><strong>4 + 4&ndash;6 frozen</strong>portions total</div>
+            </div>
+          </div>
+
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Soup base <span style="color:var(--blue);font-size:10px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;letter-spacing:0.1em;font-weight:normal;">Sunday cook</span></h4>
+                <ul>
+                  <li><span class="amount">8 oz</span>dried medium white beans (cannellini), soaked overnight if possible</li>
+                  <li><span class="amount">6 cloves</span>garlic</li>
+                  <li><span class="amount">4</span>medium carrots, scrubbed, roughly chopped</li>
+                  <li><span class="amount">1</span>leek (white and pale green only), halved, rinsed, roughly chopped</li>
+                  <li><span class="amount">&frac13; cup</span>extra-virgin olive oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1</span>smoked ham hock (or 4 oz pancetta or bacon ends)</li>
+                  <li><span class="amount">1 (15-oz) can</span>whole peeled tomatoes</li>
+                  <li><span class="amount">1 bunch</span>kale, leaves stripped from stems</li>
+                  <li><span class="amount">1&ndash;2</span>Parmigiano rinds (optional, big flavor boost if you have them)</li>
+                  <li><span class="amount">2</span>bay leaves</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                </ul>
+
+                <h4 class="section-label" style="margin-top:20px">Tuesday night &mdash; just to finish</h4>
+                <ul>
+                  <li><span class="amount">8 oz</span>small dried pasta (ditalini, small shells, pipette, orzo)</li>
+                  <li><span class="amount">&mdash;</span>kosher salt for the pasta water</li>
+                  <li><span class="amount">to serve</span>Parmigiano for grating, crusty bread, crushed red pepper, olive oil</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="section-label">Sunday &mdash; cook the soup base</h4>
+              <div class="steps">
+                <div class="step"><strong>Power-soak the beans if you didn't soak overnight:</strong> put beans in a large pot, cover with water by 1", bring to a boil. As soon as it boils, turn off heat, stir in a palmful of salt, cover, and let sit for 1 hour. Drain.</div>
+                <div class="step">In a food processor, combine the garlic, carrots, and leeks. Pulse until very finely chopped (small confetti).</div>
+                <div class="step">In a soup pot or Dutch oven, heat &frac13; cup olive oil over medium. Add the chopped vegetable mix. Season generously with salt and pepper. Cook, stirring often, until the vegetables sweat out their liquid, 3&ndash;5 min. <em>Don't brown them &mdash; just soften.</em></div>
+                <div class="step">Cover the pot and cook over medium-low, stirring every 5 minutes, until the sofrito is very soft and juicy, about 15 min. Reduce heat if it starts to brown.</div>
+                <div class="step">Add the ham hock (or pancetta) and cook uncovered, stirring and scraping the bottom of the pot every 5 min, until the sofrito starts to brown in places and has lost at least half its volume, about 10 min more.</div>
+                <div class="step">Add the soaked beans plus water to cover by 2", the canned tomatoes (crush with your hands as you add), and the kale. Season with salt and pepper. Bring to a boil, then add the Parmigiano rinds (if using) and bay leaves. Reduce heat to a very gentle simmer.</div>
+                <div class="step">Cook with the lid askew until the beans are very tender, 1 to 3 hours depending on the beans' age. Add water as needed to keep the beans submerged by at least 1". Taste and adjust salt; the soup should be well-seasoned.</div>
+                <div class="step"><strong>Divide the soup:</strong> remove the ham hock (if you used one) &mdash; pull off any meat, shred it, return to the soup. Discard bones, bay leaves, Parmigiano rinds.</div>
+                <div class="step">Reserve ~6 cups soup base for Tuesday in a large container. Portion the remaining 6&ndash;9 cups into 4&ndash;6 freezer-safe quart bags or containers (1&frac12; cups each = one adult serving). Label "Pasta e Fagiole base, [date]". Freeze flat for stacking.</div>
+              </div>
+
+              <h4 class="section-label" style="margin-top:24px">Tuesday &mdash; 15 min to dinner</h4>
+              <div class="steps">
+                <div class="step">Reheat the reserved 6 cups of soup base in a pot over medium-low, adding water (or stock if you have it) as needed to loosen &mdash; the base will have thickened in the fridge.</div>
+                <div class="step">Meanwhile, bring a separate pot of well-salted water to a boil. Add the pasta and set a timer for 2&ndash;3 min less than the package time &mdash; you want very al dente. Drain.</div>
+                <div class="step"><strong>Crucial:</strong> add the cooked pasta to the soup just before serving. <em>Do not cook the pasta in the soup.</em> The noodles will absorb all the liquid, get gummy, and ruin the leftovers.</div>
+                <div class="step">Taste, adjust salt and pepper. Serve in bowls with grated Parm, a drizzle of olive oil, crushed red pepper, and bread for dunking.</div>
+              </div>
+
+              <div class="freezer-note">
+                <strong>Freezing &amp; reheating the base</strong>
+                The bean-and-vegetable base freezes for 3 months. To reheat a frozen portion: thaw overnight in the fridge, or place the frozen block in a pot with &frac14; cup water over medium-low, covered, for 15 min. Add a fresh handful of cooked small pasta when warm. <em>Never freeze the pasta in the soup &mdash; pasta-on-day-three is sad, pasta-after-freezing is worse.</em>
+              </div>
+
+              <div class="ahead-note">
+                <strong>Sunday prep timing</strong>
+                Start the beans around 1pm if soaking the morning of, or earlier if you've soaked overnight. The 1&ndash;3 hour simmer is hands-off &mdash; you can do other prep while it cooks. Plan for the whole soup process to take ~3 hours start to finish, mostly passive.
+              </div>
+
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Pasta e fagiole is one of the great kid-friendly soups: soft beans, tender pasta, mild flavor, easy to eat with a spoon. For the 13-mo: ladle a small bowl, mash the beans slightly with the back of a spoon, cut a few pasta pieces in half. Skip the red pepper flakes. For the 34-mo: an unmodified small portion is usually a hit. The Parm cheese on top is a kid win &mdash; just go light for the 13-mo (sodium).
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="2">
+          <div class="recipe-head">
+            <div class="eyebrow">Wednesday &middot; Greek</div>
+            <h2>Greek Pork Meatballs<br>in Tomato Sauce<br><span style="font-size:24px;color:var(--blue-deep)">Freezer-friendly</span></h2>
+            <div class="source">From <em>Milk Street: Tuesday Nights Mediterranean</em> by Christopher Kimball (2021). Soutzoukakia smyrneika.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>25 min day-of</strong>(meatballs shaped Sunday)</div>
+              <div class="stat"><strong>20 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>12" nonstick skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ raw frozen batch</div>
+            </div>
+          </div>
+
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Scaled to 1&frac12; lb pork <span style="color:var(--blue);font-size:10px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;letter-spacing:0.1em;font-weight:normal;">Shape 18 total, eat 12, freeze 6</span></h4>
+                <ul>
+                  <li><span class="amount">&frac34; cup</span>panko breadcrumbs</li>
+                  <li><span class="amount">1</span>large egg + 1 yolk</li>
+                  <li><span class="amount">&frac34; cup</span>water</li>
+                  <li><span class="amount">1&frac12; lb</span>ground pork</li>
+                  <li><span class="amount">1 Tbsp</span>ground cumin</li>
+                  <li><span class="amount">4 cloves</span>garlic (3 finely grated, 1 thinly sliced)</li>
+                  <li><span class="amount">1 tsp</span>red pepper flakes, divided</li>
+                  <li><span class="amount">3 Tbsp</span>finely chopped fresh oregano, divided</li>
+                  <li><span class="amount">1&frac12; tsp</span>kosher salt + 1 tsp pepper for meatballs</li>
+                </ul>
+
+                <h4 class="section-label" style="margin-top:20px">Sauce (Wed night only)</h4>
+                <ul>
+                  <li><span class="amount">2 Tbsp</span>extra-virgin olive oil, plus more to serve <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">28-oz can</span>crushed tomatoes</li>
+                  <li><span class="amount">&frac12; tsp</span>ground cinnamon</li>
+                  <li><span class="amount">2 tsp</span>honey</li>
+                  <li><span class="amount">&frac12; tsp</span>salt + &frac14; tsp pepper for sauce</li>
+                </ul>
+
+                <h4 class="section-label" style="margin-top:20px">Greek cucumber-tomato salad (Wed night only)</h4>
+                <ul>
+                  <li><span class="amount">1</span>English cucumber (or 2 Persian), diced into &frac12;" pieces</li>
+                  <li><span class="amount">1 pint</span>cherry tomatoes, halved</li>
+                  <li><span class="amount">&frac14;</span>small red onion, very thinly sliced</li>
+                  <li><span class="amount">2 Tbsp</span>extra-virgin olive oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>red wine vinegar</li>
+                  <li><span class="amount">&frac12; tsp</span>dried oregano <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">opt.</span>crumbled feta, a small handful</li>
+                </ul>
+
+                <h4 class="section-label" style="margin-top:20px">To serve</h4>
+                <ul>
+                  <li><span class="amount">opt.</span>rice, orzo, or warm pita</li>
+                  <li><span class="amount">opt.</span>plain Greek yogurt on the side</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="section-label">Sunday &mdash; shape the meatballs (12 + 6 to freeze)</h4>
+              <div class="steps">
+                <div class="step">In a medium bowl, combine the panko, egg, yolk, and water. Mix until smooth. Let stand 5 min so the panko hydrates &mdash; this is the panade, and it gives the meatballs their tender texture. <em>Don't skip this step.</em></div>
+                <div class="step">Add the ground pork, cumin, 3 grated garlic cloves (save the sliced one for Wednesday's sauce), &frac12; tsp red pepper flakes (save the rest for Wed), 1&frac12; Tbsp oregano (save the rest), 1&frac12; tsp salt, and 1 tsp pepper. Mix well with your hands but don't overwork.</div>
+                <div class="step">Divide into 18 portions (each a scant &frac14; cup). Shape each into a 2&frac12;" cigar shape. Wet your hands slightly to prevent sticking.</div>
+                <div class="step"><strong>For 12 (for Wednesday):</strong> arrange on a parchment-lined plate, cover with plastic, refrigerate.</div>
+                <div class="step"><strong>For 6 (for the freezer):</strong> arrange on a parchment-lined small sheet pan or plate, freeze uncovered until solid (~2 hours), then transfer to a freezer bag. Label "Greek pork meatballs, raw, [date]". Keeps 2 months. To use later: thaw overnight in fridge, then cook from the "Method" step below.</div>
+              </div>
+
+              <h4 class="section-label" style="margin-top:24px">Wednesday &mdash; 25 min to dinner</h4>
+              <div class="steps">
+                <div class="step">Heat 2 Tbsp olive oil in a 12" nonstick skillet over medium-high until shimmering.</div>
+                <div class="step">Add the 12 meatballs and cook undisturbed until browned on the bottoms, 2&ndash;3 min. Using tongs, flip and brown the second sides, another 2&ndash;3 min. Transfer to a paper-towel-lined plate.</div>
+                <div class="step">Return the skillet to medium-high. Add the sliced garlic clove. Cook, stirring, until fragrant and starting to brown, 1&ndash;2 min.</div>
+                <div class="step">Add the remaining &frac12; tsp red pepper flakes; cook stirring 30 seconds. Stir in the crushed tomatoes, cinnamon, honey, &frac12; tsp salt, and &frac14; tsp black pepper. Bring to a simmer.</div>
+                <div class="step">Nestle the meatballs back into the sauce. Return to a simmer, cover, and cook undisturbed until the meatballs reach 160&deg;F at center, 12&ndash;14 min.</div>
+                <div class="step">While the meatballs simmer, make the salad: in a medium bowl, combine the diced cucumber, halved cherry tomatoes, and sliced red onion. Add olive oil, red wine vinegar, dried oregano, &frac12; tsp salt, and a few grinds of black pepper. Toss gently. Taste and adjust salt. (If you have feta, crumble it over the top just before serving.) Let sit until ready to plate &mdash; the tomatoes will release some of their juices, which makes the salad even better.</div>
+                <div class="step">Transfer meatballs and sauce to a serving dish. Drizzle with additional olive oil and sprinkle with the remaining 1&frac12; Tbsp oregano. Plate alongside the cucumber-tomato salad. Serve.</div>
+              </div>
+
+              <div class="freezer-note">
+                <strong>Why freeze raw, not cooked</strong>
+                Raw meatballs freeze better than cooked: less freezer-burn risk, no soggy texture on thaw. To use the frozen batch later: thaw 6 in the fridge overnight, then proceed with the cooking method using a half-batch of sauce (14-oz can tomatoes instead of 28-oz; halve everything else in the sauce). 25 min to dinner from a freezer raid.
+              </div>
+
+              <div class="ahead-note">
+                <strong>Sunday prep (~30 min)</strong>
+                The panade hydration is 5 min, mixing is 5, shaping 18 cigars is ~15 min, flash-freezing 6 of them is hands-off. Total ~25 min for everything. Schedule this after the pasta e fagiole has its lid askew and is simmering. <em>Salad prep is Wednesday only:</em> cucumber and cherry tomatoes are best diced just before serving (they get watery if cut ahead), but you can thinly slice the red onion Tuesday night and store it covered &mdash; the bite mellows overnight.
+              </div>
+
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Meatballs are gold for both kids. For the 13-mo: pull 2 meatballs from the pan <em>before</em> adding red pepper flakes to the sauce; finish them in plain crushed tomatoes (set aside half a cup at the start). Break the cooked meatballs apart with a fork to serve. For the 34-mo: a whole meatball with a little sauce is usually a hit; the cinnamon-honey-tomato combo is gentle and warming. <em>For the salad:</em> cherry tomatoes are an AAP choking hazard whole &mdash; quarter them for the 13-mo, halve for the 34-mo. Cucumber is fine for both ages in small dice. Skip the raw red onion for both kids (sharp); skip the vinegar dressing for the 13-mo (acidic) &mdash; offer a few plain cucumber and tomato pieces instead.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="3">
+          <div class="recipe-head">
+            <div class="eyebrow">Thursday &middot; Mediterranean</div>
+            <h2>Lemony Shrimp<br>&amp; Bean Stew</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Sue Li.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>30 min</strong>total</div>
+              <div class="stat"><strong>25 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>large pot</div>
+              <div class="stat"><strong>4 servings</strong></div>
+            </div>
+          </div>
+
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">1 tsp</span>grated lemon zest</li>
+                  <li><span class="amount">1 tsp</span>sweet or smoked paprika</li>
+                  <li><span class="amount">2 cloves</span>garlic, grated</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 lb</span>large shrimp, peeled, deveined, tails removed</li>
+                  <li><span class="amount">2</span>large leeks (or 1 large onion)</li>
+                  <li><span class="amount">4 Tbsp</span>unsalted butter</li>
+                  <li><span class="amount">1 (15-oz) can</span>cannellini beans, drained and rinsed</li>
+                  <li><span class="amount">2 cups</span>chicken or vegetable stock</li>
+                  <li><span class="amount">2 Tbsp</span>finely chopped fresh parsley</li>
+                  <li><span class="amount">2 Tbsp</span>fresh lemon juice</li>
+                  <li><span class="amount">to serve</span>toasted bread</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">In a medium bowl, mix the lemon zest, paprika, grated garlic, &frac34; tsp salt, and &frac34; tsp pepper. Add the shrimp, toss to coat, and set aside while you prep the leeks.</div>
+                <div class="step">Trim the leeks: cut off the dark green tops and root ends. Halve lengthwise and cut the white and pale green parts into &frac12;"-thick half-moons. Rinse thoroughly in a bowl of cold water to remove grit; drain. (If using onion instead, just mince it.)</div>
+                <div class="step">Melt the butter in a large pot over medium-high heat. When foaming, add the shrimp. Cook, stirring occasionally, until pink and starting to curl, 2&ndash;3 min.</div>
+                <div class="step">Use a slotted spoon to transfer the shrimp to a plate; set aside. Leave the butter and any liquid in the pot.</div>
+                <div class="step">Reduce heat to medium. Add the leeks (or onion), season with salt and pepper. Cook, stirring occasionally, until soft and starting to brown at the edges, 4&ndash;5 min.</div>
+                <div class="step">Add the cannellini beans and stock. Increase heat to high; bring to a boil. Lower to a simmer and cook 8&ndash;10 min &mdash; this lets the flavors marry and the broth thicken slightly.</div>
+                <div class="step">Stir in the reserved shrimp (and any juices on the plate), the parsley, and the lemon juice. Season with salt and pepper. Serve immediately with toasted bread on the side.</div>
+              </div>
+
+              <div class="ahead-note">
+                <strong>Make ahead (Wednesday evening, ~5 min)</strong>
+                Zest the lemon (store with a few drops of olive oil to prevent drying), juice the lemon (jar it), mix the shrimp spice blend (lemon zest + paprika + garlic + salt + pepper) in a small jar. If using shell-on shrimp: peel, devein, tail-off Wednesday night; store on a paper-towel-lined plate, covered. Trim and slice the leeks; store in a container.
+              </div>
+
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Shrimp is fine developmentally for both kids; if either hasn't had shellfish before, introduce small and watch for 2 hours. For the 13-mo: chop a couple of cooked shrimp into very small pieces; serve with a spoonful of broth and a few mashed beans. For the 34-mo: whole or halved shrimp with bread for dunking is usually a hit. Skip the lemon juice for the 13-mo (acid is sharp); the toddler version is gentler. The paprika is mild enough for both.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="4">
+          <div class="recipe-head">
+            <div class="eyebrow">Friday &middot; American / Tex-Mex</div>
+            <h2>Spicy Pork &amp; Black<br>Bean Chili<br><span style="font-size:24px;color:var(--blue-deep)">Freezer-friendly</span></h2>
+            <div class="source">From <em>Dinner</em> by Melissa Clark (2017).</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>10 min day-of</strong>(chili made Sunday)</div>
+              <div class="stat"><strong>10 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>reheat in pot</div>
+              <div class="stat"><strong>6&ndash;8 frozen Sun</strong>thaw 4&ndash;5 Wed for Fri</div>
+            </div>
+          </div>
+
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Scaled to 1&frac12; lb pork <span style="color:var(--blue);font-size:10px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;letter-spacing:0.1em;font-weight:normal;">Eat ~4 portions Fri, freeze 2&ndash;4</span></h4>
+                <ul>
+                  <li><span class="amount">3 Tbsp</span>extra-virgin olive oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 large</span>white onion, diced</li>
+                  <li><span class="amount">1</span>poblano chile or red bell pepper, diced</li>
+                  <li><span class="amount">1&frac12; lb</span>ground pork</li>
+                  <li><span class="amount">3 tsp</span>kosher salt, plus more to taste <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1&frac12; tsp</span>freshly ground black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>dried oregano</li>
+                  <li><span class="amount">1&frac12; Tbsp</span>fresh sage, minced (or 2 tsp dried)</li>
+                  <li><span class="amount">1&frac12; Tbsp</span>chili powder</li>
+                  <li><span class="amount">3 cloves</span>garlic, minced</li>
+                  <li><span class="amount">28-oz can</span>diced tomatoes</li>
+                  <li><span class="amount">2 (15-oz) cans</span>black beans, rinsed and drained</li>
+                  <li><span class="amount">1 cup</span>lager beer (Negra Modelo or similar) &mdash; or substitute chicken stock</li>
+                </ul>
+
+                <h4 class="section-label" style="margin-top:20px">To serve (Fri night)</h4>
+                <ul>
+                  <li><span class="amount">opt.</span>grated white cheddar or sour cream</li>
+                  <li><span class="amount">&mdash;</span>lime wedges</li>
+                  <li><span class="amount">opt.</span>cooked rice or warm cornbread on the side</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="section-label">Sunday &mdash; cook the chili (~1 hour)</h4>
+              <div class="steps">
+                <div class="step">Heat the olive oil in a large pot or Dutch oven over medium-high heat.</div>
+                <div class="step">Add the diced onion and poblano (or bell pepper). Cook, stirring, until softened and lightly browned, about 7 min.</div>
+                <div class="step">Add the ground pork. Break it up with a wooden spoon and cook until well-browned, another 7 min. The pork should release fat and brown in places.</div>
+                <div class="step">Stir in the salt, pepper, oregano, sage, chili powder, and minced garlic. Cook 1 minute until fragrant.</div>
+                <div class="step">Add the diced tomatoes (with all their liquid), the black beans, and the beer (or stock). Stir well, scraping the bottom of the pot to lift any browned bits. Bring to a boil.</div>
+                <div class="step">Reduce heat to medium-low and simmer until slightly thickened, 30&ndash;40 min. Stir occasionally. Taste and adjust salt and pepper at the end.</div>
+                <div class="step">Cool to room temperature. <strong>Portion all of it for the freezer.</strong> Divide into 6&ndash;8 freezer bags (1&frac12;&ndash;2 cups each = one adult serving; ~6 total cups for Friday's dinner + 4&ndash;8 cups for future weeks). Label "Pork chili, [date]". Freeze flat for stacking. <em>Important:</em> don't hold any in the fridge &mdash; Sunday-to-Friday is too long for a cooked meat dish to sit refrigerated.</div>
+                <div class="step"><strong>Wednesday evening</strong> (sets up Friday): move 4&ndash;5 freezer bags (~6 cups total) from the freezer to the fridge to thaw slowly. By Friday they'll be fully thawed and ready to reheat.</div>
+              </div>
+
+              <h4 class="section-label" style="margin-top:24px">Friday &mdash; 10 min to dinner</h4>
+              <div class="steps">
+                <div class="step">Empty the thawed chili bags into a pot. Reheat over medium-low, stirring occasionally, until heated through &mdash; 10&ndash;12 min. Add a splash of water or stock if it has thickened too much.</div>
+                <div class="step">Taste, adjust salt. Serve in bowls with cheese, sour cream, lime wedges, and rice or cornbread alongside.</div>
+              </div>
+
+              <div class="freezer-note">
+                <strong>Freezing &amp; reheating</strong>
+                Chili is the platonic freezer meal &mdash; the spices deepen, the textures stay intact, and the reheat is foolproof. Keeps 3 months. To reheat a frozen portion: thaw in the fridge overnight, then warm in a pot over medium-low; or warm from frozen in a covered pot with &frac14; cup added water over medium-low for 20 min, stirring occasionally to break up the block.
+              </div>
+
+              <div class="ahead-note">
+                <strong>Sunday prep timing</strong>
+                The chili is your last Sunday cook of the day. Start it after the meatballs are shaped and the pasta e fagiole is at its lid-askew simmer. 20 min of active work (sauteing, browning), then 30&ndash;40 min hands-off simmer.
+              </div>
+
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                The chili powder is spicy for a 13-month-old. <strong>Best approach:</strong> when cooking on Sunday, set aside a 1-cup portion <em>before</em> adding the chili powder &mdash; just season with salt and the milder spices. Simmer separately in a small pot for the 30 min; freeze if not using right away. This gives you a kid-safe baseline of 4&ndash;5 toddler portions for the week. For the 34-mo: a small portion of the regular chili thinned with sour cream usually goes down well. Beans are easy chew for both kids; ground pork is well-broken-down. Skip the cheese sprinkle for the 13-mo (sodium).
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="grocery">
+    <div class="grocery-note">
+      <strong>Two-delivery week</strong>
+      Friday's shrimp is the only fragile ingredient that won't hold from Sunday. Delivery 1 covers everything else. If you'd rather skip Delivery 2, order frozen shrimp Sun and thaw it Wednesday night.
+      <div class="legend">
+        <span><span class="dot d1"></span>Delivery 1 &mdash; Sun</span>
+        <span><span class="dot d2"></span>Delivery 2 &mdash; Thu morning</span>
+      </div>
+    </div>
+
+    <div class="grocery-grid">
+      <div class="grocery-section">
+        <h3>Proteins <span class="count">4 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Boneless skinless chicken breasts <span class="tag d1">D1</span><span class="item-amt">2 (about &frac12; lb each) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Ground pork <span class="tag d1">D1</span><span class="item-amt">3 lb total (1&frac12; lb meatballs + 1&frac12; lb chili)</span></span></li>
+          <li><span class="check-box"></span><span>Smoked ham hock <span class="tag d1">D1</span><span class="item-amt">1 small (or 4 oz pancetta) &middot; for Tuesday soup base</span></span></li>
+          <li><span class="check-box"></span><span>Large shrimp, peeled &amp; deveined <span class="tag d2">D2</span><span class="item-amt">1 lb &middot; for Thursday (or frozen with D1)</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Produce <span class="count">14 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Green cabbage <span class="tag d1">D1</span><span class="item-amt">1 small head (you'll use half) &middot; for Monday slaw. <em>Skip if you have leftover cabbage from last week.</em></span></span></li>
+          <li><span class="check-box"></span><span>Kale, lacinato or curly <span class="tag d1">D1</span><span class="item-amt">1 bunch &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Leeks <span class="tag d1">D1</span><span class="item-amt">3 medium (1 Tue, 2 Thu)</span></span></li>
+          <li><span class="check-box"></span><span>Carrots <span class="tag d1">D1</span><span class="item-amt">4 (about 1 lb) &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>White onion <span class="tag d1">D1</span><span class="item-amt">1 large &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Red onion <span class="tag d1">D1</span><span class="item-amt">1 small (only &frac14; used Wed; rest keeps) &middot; for Wednesday salad</span></span></li>
+          <li><span class="check-box"></span><span>English cucumber (or 2 Persian) <span class="tag d1">D1</span><span class="item-amt">1 &middot; for Wednesday salad</span></span></li>
+          <li><span class="check-box"></span><span>Cherry tomatoes <span class="tag d1">D1</span><span class="item-amt">1 pint &middot; for Wednesday salad</span></span></li>
+          <li><span class="check-box"></span><span>Poblano chile or red bell pepper <span class="tag d1">D1</span><span class="item-amt">1 &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Garlic <span class="tag d1">D1</span><span class="item-amt">2 heads &middot; used everywhere</span></span></li>
+          <li><span class="check-box"></span><span>Fresh ginger <span class="tag d1">D1</span><span class="item-amt">small knob &middot; for Monday tonkatsu sauce</span></span></li>
+          <li><span class="check-box"></span><span>Scallions <span class="tag d1">D1</span><span class="item-amt">1 bunch (2 used Mon, rest keeps) &middot; for Monday cabbage salad</span></span></li>
+          <li><span class="check-box"></span><span>Lemons <span class="tag d1">D1</span><span class="item-amt">2 &middot; Mon serving + Thu stew</span></span></li>
+          <li><span class="check-box"></span><span>Lime <span class="tag d1">D1</span><span class="item-amt">1 &middot; for Friday garnish</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Herbs <span class="count">3 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Fresh oregano <span class="tag d1">D1</span><span class="item-amt">1 small bunch (3 Tbsp chopped) &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh sage <span class="tag d1">D1</span><span class="item-amt">1 small bunch (1&frac12; Tbsp minced) &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh flat-leaf parsley <span class="tag d2">D2</span><span class="item-amt">1 small bunch (2 Tbsp chopped) &middot; for Thursday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Dairy <span class="count">3 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Unsalted butter <span class="tag d1">D1</span><span class="item-amt">1 stick (4 Tbsp Thu) &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Parmigiano-Reggiano <span class="tag d1">D1</span><span class="item-amt">small wedge (Tue serving + ideally a rind for the soup base)</span></span></li>
+          <li><span class="check-box"></span><span>White cheddar or sour cream (optional) <span class="tag d1">D1</span><span class="item-amt">small &middot; for Friday garnish</span></span></li>
+          <li><span class="check-box"></span><span>Large eggs <span class="tag d1">D1</span><span class="item-amt">3 (2 for Mon katsu, 1 for Wed meatballs)</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Canned &amp; Dry <span class="count">9 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Dried medium white beans (cannellini) <span class="tag d1">D1</span><span class="item-amt">8 oz bag &middot; for Tuesday (also: keep extra for future weeks)</span></span></li>
+          <li><span class="check-box"></span><span>Canned cannellini beans <span class="tag d1">D1</span><span class="item-amt">1 (15-oz) can &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Canned black beans <span class="tag d1">D1</span><span class="item-amt">2 (15-oz) cans &middot; for Friday chili</span></span></li>
+          <li><span class="check-box"></span><span>Canned whole peeled tomatoes <span class="tag d1">D1</span><span class="item-amt">1 (15-oz) can &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Canned crushed tomatoes <span class="tag d1">D1</span><span class="item-amt">1 (28-oz) can &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Canned diced tomatoes <span class="tag d1">D1</span><span class="item-amt">1 (28-oz) can &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Small dried pasta (ditalini, small shells, orzo) <span class="tag d1">D1</span><span class="item-amt">1 lb box (only 8 oz used Tue, rest keeps)</span></span></li>
+          <li><span class="check-box"></span><span>Panko breadcrumbs <span class="tag d1">D1</span><span class="item-amt">large box &middot; 1&frac12; cups Mon katsu + &frac34; cup Wed meatballs</span></span></li>
+          <li><span class="check-box"></span><span>Crusty bread <span class="tag d1">D1</span><span class="item-amt">1 loaf &middot; Tue + Thu (or pre-slice and freeze)</span></span></li>
+          <li><span class="check-box"></span><span>All-purpose flour <span class="pantry-note">(pantry)</span><span class="item-amt">&frac12; cup used Mon &middot; you have it</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Tonkatsu sauce &amp; Mon-specific <span class="count">5 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Ketchup <span class="tag d1">D1</span><span class="item-amt">small bottle (6 Tbsp used) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Worcestershire sauce <span class="tag d1">D1</span><span class="item-amt">small bottle (6 Tbsp used) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Unsulfured molasses <span class="tag d1">D1</span><span class="item-amt">small bottle (4 tsp used) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Ground cloves <span class="tag d1">D1</span><span class="item-amt">small jar if not on hand (&frac18; tsp used) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Vegetable or canola oil for frying <span class="tag d1">D1</span><span class="item-amt">1 bottle (~1 cup used for &frac13;" frying depth) &middot; for Monday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Pantry items <span class="count">mostly carryover</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Chicken or vegetable stock <span class="tag d1">D1</span><span class="item-amt">1 quart &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Lager beer (Negra Modelo or similar) <span class="tag d1">D1</span><span class="item-amt">1 bottle &middot; for Friday chili (or skip with stock)</span></span></li>
+          <li><span class="check-box"></span><span>Bay leaves <span class="tag d1">D1</span><span class="item-amt">small jar if not on hand &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Red wine vinegar <span class="tag d1">D1</span><span class="item-amt">small bottle if not on hand (1 Tbsp used Wed) &middot; for Wednesday salad</span></span></li>
+          <li><span class="check-box"></span><span>Dried oregano <span class="tag d1">D1</span><span class="item-amt">jar if not on hand &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Chili powder <span class="tag d1">D1</span><span class="item-amt">jar if not on hand &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Granulated sugar <span class="pantry-note">(pantry)</span><span class="item-amt">2 tsp used Mon &middot; you have it</span></span></li>
+          <li><span class="check-box"></span><span>Ground cinnamon, cumin, red pepper flakes, honey <span class="tag d1">D1</span><span class="item-amt">have from last weeks</span></span></li>
+          <li><span class="check-box"></span><span>Low-sodium soy sauce <span class="pantry-note">(pantry)</span><span class="item-amt">2 tsp used Mon &middot; you have it</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>You likely have <span class="count">pantry</span></h3>
+        <ul style="color:var(--ink-soft);font-style:italic">
+          <li><span style="opacity:.4">&middot;</span> Olive oil</li>
+          <li><span style="opacity:.4">&middot;</span> Kosher salt &amp; black pepper</li>
+          <li><span style="opacity:.4">&middot;</span> Rice (for Wed or Fri serving)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="prep">
+    <p class="lede">This week's Sunday is the heaviest yet (~2 hr), but it's the only intensive day. After that, Tue/Wed/Fri are 10&ndash;25 min weeknights and Mon/Thu are fresh-cook 30 min nights. <em>Two deliveries.</em></p>
+
+    <div class="prep-timeline">
+
+      <div class="prep-event delivery">
+        <div class="when">Sun morning <span class="duration">&middot; ~30-60 min after order</span></div>
+        <h3>Delivery 1 lands</h3>
+        <ul>
+          <li class="for">Everything except shrimp + parsley</li>
+          <li><strong>On arrival:</strong> unpack and refrigerate fresh items. No urgent processing &mdash; you'll handle everything in the Sunday prep session.</li>
+          <li><strong>Refrigerate the chicken cutlets and ground pork first</strong> &mdash; you'll process them during Sunday prep below.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event start">
+        <div class="when">Sun afternoon/evening <span class="duration">&middot; ~2 hr total, mostly hands-off</span></div>
+        <h3>The big prep day</h3>
+        <ul>
+          <li class="for">Sets up Mon, Tue, Wed, and Fri all at once</li>
+          <li><strong>Step 1 (12 min) &mdash; Monday's setup.</strong> Mix the tonkatsu sauce (ketchup, Worcestershire, molasses, soy sauce, sugar, grated ginger, ground cloves) in a jar &mdash; keeps in the fridge indefinitely. Whisk the cabbage-salad dressing (2 Tbsp rice vinegar + 1 Tbsp sesame oil + 1 tsp soy sauce + 1 tsp sugar + pinch salt) in a separate small jar. Pound the 4 chicken cutlets thin between sheets of plastic wrap to &frac14;"; store covered in fridge. Shred half the head of cabbage (12 oz, about 4 cups packed); thinly slice 2 scallions; store cabbage and scallions together in a container with a damp paper towel.</li>
+          <li><strong>Step 2 (5 min) &mdash; Start the bean soak.</strong> Cover 8 oz dried cannellini beans with 1" water in a pot. Bring to a boil; turn off heat, stir in a palmful of salt, cover, and let sit 1 hour (the "power soak"). Drain when you're ready to use them.</li>
+          <li><strong>Step 3 (1&frac12;&ndash;3 hr passive) &mdash; Cook the pasta e fagiole base.</strong> Food-process garlic, carrots, and leeks together until finely chopped. Saute in &frac13; cup olive oil until soft, ~15 min. Add ham hock; cook 10 min more. Add soaked beans + water to cover + canned tomatoes + kale + Parmigiano rinds + bay leaves. Simmer with lid askew 1&ndash;3 hr until beans are tender. <em>Active time only ~25 min; the rest is simmering while you do other things.</em></li>
+          <li><strong>Step 4 (25 min, while soup simmers) &mdash; Shape Greek meatballs.</strong> Mix panko + egg + water; rest 5 min. Combine with pork, cumin, garlic, spices, oregano. Divide into 18 cigars. Plate 12 for Wed (refrigerate), flash-freeze 6 (freeze raw on a parchment-lined plate, ~2 hr, then bag and label).</li>
+          <li><strong>Step 5 (1 hr active + 30&ndash;40 min simmer) &mdash; Cook the pork chili.</strong> Brown onion + poblano. Add pork, brown. Add spices, garlic. Add tomatoes, black beans, beer. Simmer 30&ndash;40 min. <em>Start this when the pasta e fagiole has 30 min left.</em></li>
+          <li><strong>Step 6 (10 min) &mdash; Portion &amp; freeze.</strong> Once pasta e fagiole base is done: remove ham hock, shred meat back in, discard bones. Reserve 6 cups for Tue (fridge); freeze 4&ndash;6 portions. Once chili is done: <em>freeze all of it</em> in 6&ndash;8 portions &mdash; don't hold any in the fridge. You'll move 4&ndash;5 of those bags to the fridge on Wednesday to thaw for Friday. Label everything with name + date.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Mon evening <span class="duration">&middot; 30 min</span></div>
+        <h3>Chicken katsu night</h3>
+        <ul>
+          <li class="for">Day-of for Monday</li>
+          <li>Start rice if using (~18 min for jasmine).</li>
+          <li>Heat &frac13;" of oil in a heavy skillet to 350&deg;F. Set up flour, beaten eggs, and panko in three shallow bowls.</li>
+          <li>Season cutlets, dredge flour&rarr;egg&rarr;panko, fry 2 at a time (2 min/side).</li>
+          <li>While the second batch fries, dress the cabbage: pour the pre-mixed dressing over the shredded cabbage + scallions, toss well, let sit 2&ndash;3 min. Sprinkle with sesame seeds before serving.</li>
+          <li>Plate katsu with cabbage salad and rice, drizzle tonkatsu sauce over the chicken, serve with lemon wedges.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Tue evening <span class="duration">&middot; 15 min</span></div>
+        <h3>Pasta e fagiole reheat</h3>
+        <ul>
+          <li class="for">Day-of for Tuesday</li>
+          <li>Reheat 6 cups soup base over medium-low, adding water as needed.</li>
+          <li>Boil pasta in salted water, very al dente (2&ndash;3 min less than package time). Drain.</li>
+          <li>Combine just before serving. Top with Parm, olive oil, red pepper flakes.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Wed evening <span class="duration">&middot; ~5 min Thursday-prep + 1 min Friday-prep</span></div>
+        <h3>Thursday prep + Friday thaw</h3>
+        <ul>
+          <li class="for">For Thursday's stew</li>
+          <li>Zest and juice the lemon. Store zest covered with a few drops of olive oil; juice in a jar.</li>
+          <li>Mix the shrimp spice blend (lemon zest + paprika + grated garlic + salt + pepper) in a small jar.</li>
+          <li>Trim and slice the leeks (white &amp; light green into &frac12;" half-moons), rinse, drain, refrigerate.</li>
+          <li class="for">For Friday's chili</li>
+          <li><strong>Move 4&ndash;5 chili bags from the freezer to the fridge.</strong> They'll thaw slowly over the next 36&ndash;48 hours and be ready to reheat Friday evening. (Why now and not Thursday: ground meat thaws best with extra time at fridge temp, not rushed.)</li>
+        </ul>
+      </div>
+
+      <div class="prep-event delivery">
+        <div class="when">Thu morning <span class="duration">&middot; small order</span></div>
+        <h3>Delivery 2 lands</h3>
+        <ul>
+          <li class="for">Shrimp + parsley</li>
+          <li><strong>On arrival:</strong> if shrimp arrived raw and chilled, refrigerate &mdash; it'll be used in 8 hours. If it arrived frozen, leave in fridge to thaw (most modern Amazon Fresh shrimp arrives frozen even when listed as fresh).</li>
+          <li><strong>Skip this delivery if you ordered frozen shrimp Sunday:</strong> move it from freezer to fridge Wednesday night to thaw for Thursday.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Thu evening <span class="duration">&middot; 30 min</span></div>
+        <h3>Shrimp stew night</h3>
+        <ul>
+          <li class="for">Day-of for Thursday</li>
+          <li>Pat shrimp dry, toss with the prepared spice mix, set aside.</li>
+          <li>Saute shrimp in butter (2&ndash;3 min); remove.</li>
+          <li>Saute leeks (4&ndash;5 min). Add beans + stock, simmer 8&ndash;10 min. Return shrimp + parsley + lemon juice. Serve with bread.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Fri evening <span class="duration">&middot; 12 min</span></div>
+        <h3>Pork chili reheat</h3>
+        <ul>
+          <li class="for">Day-of for Friday</li>
+          <li>Empty the thawed chili bags from the fridge into a pot. Reheat over medium-low, stirring occasionally, 10&ndash;12 min. Add splash of water if thick.</li>
+          <li>Set out cheese, sour cream, lime wedges. Serve with rice or cornbread if you have it.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event" style="opacity:.7">
+        <div class="when">Fri night <span class="duration">&middot; when you're ready</span></div>
+        <h3>The reward</h3>
+        <ul>
+          <li class="for">12 additional meals now in your freezer</li>
+          <li>Future weeks will be faster than this one. Welcome to the freezer-pantry era.</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="panel" data-panel="pantry">
+    <div class="pantry-grid">
+      <div class="pantry-section">
+        <h3>What's now in your freezer</h3>
+        <ul>
+          <li><strong>Pasta e Fagiole base:</strong> 4&ndash;6 portions, 1&frac12; cups each. Keeps 3 months.</li>
+          <li><strong>Pork &amp; Black Bean Chili:</strong> 6&ndash;8 total portions in the freezer Sunday. You'll thaw 4&ndash;5 of them Wednesday to eat Friday; the remaining 2&ndash;4 stay in the freezer for future weeks. Keeps 3 months.</li>
+          <li><strong>Raw Greek pork meatballs:</strong> 6 meatballs (~2 servings worth). Keeps 2 months.</li>
+        </ul>
+        <p style="color:var(--ink-soft);font-size:13.5px;margin-top:14px">
+          Label everything with name + date in Sharpie on the freezer bag. Use within 3 months for best texture.
+        </p>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Reheating any frozen portion</h3>
+        <ul>
+          <li><strong>From thawed (overnight in fridge):</strong> warm in a pot over medium-low, 8&ndash;10 min, stirring.</li>
+          <li><strong>From frozen:</strong> place block in a pot with &frac14; cup water, cover, medium-low heat, 15&ndash;20 min, breaking up with a spoon as it melts.</li>
+          <li><strong>Microwave (less ideal but fast):</strong> covered bowl, 50% power, stirring every 2 min.</li>
+          <li><strong>Frozen raw meatballs:</strong> thaw overnight in fridge, then proceed with the recipe's cooking method. <em>Don't sear from frozen &mdash; they'll burn on the outside before the inside cooks.</em></li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Working with the kids</h3>
+        <ul>
+          <li><strong>Mon (Chicken katsu):</strong> kid-friendly by default &mdash; crispy chicken, no spice. For the 13-mo: cut into small strips, skip the tonkatsu sauce (too salty). For the 34-mo: serve with a small dollop of tonkatsu for dipping.</li>
+          <li><strong>Tue (Pasta e fagiole):</strong> straightforward kid food. Mash a few beans for the 13-mo; halve a few pasta pieces.</li>
+          <li><strong>Wed (Greek meatballs):</strong> the cinnamon-honey-tomato sauce is gentle. Make sure to set aside 2 meatballs for the 13-mo <em>before</em> the red pepper flakes go in the sauce.</li>
+          <li><strong>Thu (Shrimp stew):</strong> watch for shellfish allergy if either kid hasn't had it.</li>
+          <li><strong>Fri (Pork chili):</strong> the chili powder is too spicy for the 13-mo. Reserve a 1-cup portion of the pork-and-bean mixture <em>before</em> adding chili powder during Sunday's cook &mdash; freeze separately as "kid chili".</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Substitutions, if Fresh is missing something</h3>
+        <ul>
+          <li><strong>Tonkatsu sauce shortcut:</strong> bottled tonkatsu (often labeled "Bull-Dog brand") is in many supermarkets. Tastes great. Skip making it from scratch if you'd rather.</li>
+          <li><strong>Smoked ham hock:</strong> 4 oz pancetta, bacon ends, or a smoked turkey wing. Last resort: a Parmigiano rind plus 1 Tbsp tomato paste for umami depth.</li>
+          <li><strong>Dried cannellini beans:</strong> 2 cans cannellini, drained and rinsed (skip the soaking step, add directly to the sofrito with about 4 cups water).</li>
+          <li><strong>Poblano:</strong> red bell pepper (less smoky, fine), or jalapeno (hotter).</li>
+          <li><strong>Lager beer:</strong> chicken stock plus 1 tsp brown sugar gets close.</li>
+          <li><strong>Ditalini / small pasta:</strong> any small shape works. Avoid spaghetti or linguine (broken into pieces is OK but ditalini is much better).</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section" style="grid-column: 1 / -1;">
+        <h3>For next week</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px">
+          Tell me:
+        </p>
+        <ul>
+          <li>Any perishables left over (likely: leftover kale, fresh herbs, an extra leek, maybe lettuce)</li>
+          <li>Kid wins / refusals from this week</li>
+          <li>Did the Sunday session feel manageable or too long? If too long, I can rebuild next week to spread the cooking across two evening sessions.</li>
+          <li>What freezer portion you'd most like to eat next &mdash; I can build a week around using a frozen meal as one of the 5 nights.</li>
+          <li>Specific Amazon Fresh deals you saw</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  });
+
+  document.querySelectorAll('.recipe-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.recipe;
+      document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n === item));
+      document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === target));
+    });
+  });
+
+  function goToRecipe(idx) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'recipes'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === 'recipes'));
+    document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n.dataset.recipe === String(idx)));
+    document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === String(idx)));
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  document.querySelectorAll('.grocery-section li').forEach(li => {
+    if (li.querySelector('.check-box')) {
+      li.addEventListener('click', () => li.classList.toggle('checked'));
+    }
+  });
+
+  function logPerishables() {
+    const txt = document.getElementById('perishables').value.trim();
+    const out = document.getElementById('perish-out');
+    if (!txt) { out.textContent = ''; return; }
+    out.innerHTML = '<strong>Noted:</strong> ' + txt.replace(/\n/g, '<br>') + '<br><br><em>Bring this to next week\'s planning conversation and I\'ll work these into the recipes.</em>';
+  }
+</script>
