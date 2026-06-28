@@ -1,0 +1,660 @@
+<!-- Meal Plan: Mon-Wed, June 29 - July 1, 2026 -->
+<meta charset="UTF-8">
+<style>
+  :root {
+    --bg: #f7f1e6; --bg-card: #fffaf2; --ink: #2a2521; --ink-soft: #5a4e44;
+    --rule: #d9cdb8; --terracotta: #b85432; --terracotta-deep: #8e3e22;
+    --olive: #5a6b3a; --olive-deep: #3f4a28; --gold: #c89942;
+    --blue: #3a6280; --blue-deep: #234561; --plum: #7a4a6b; --plum-deep: #5a3450;
+    --ghost: #ebe1cb;
+    --shadow: 0 1px 0 rgba(42,37,33,0.04), 0 8px 24px -12px rgba(42,37,33,0.18);
+    --serif: "Fraunces", "Cormorant Garamond", Georgia, serif;
+    --sans: "Sohne", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; }
+  body, .meal-planner { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .meal-planner { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+  .mast { border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .mast-title { font-family: var(--serif); font-weight: 400; margin: 0; font-size: clamp(36px, 5vw, 58px); line-height: 0.95; letter-spacing: -0.02em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .mast-title em { font-style: italic; color: var(--terracotta); font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1; }
+  .mast-meta { text-align: right; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); line-height: 1.6; }
+  .mast-meta strong { color: var(--ink); display: block; font-weight: 500; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid var(--rule); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { background: transparent; border: none; padding: 14px 18px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-soft); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s ease; white-space: nowrap; letter-spacing: 0.02em; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--terracotta-deep); border-bottom-color: var(--terracotta); }
+  .tab-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ghost); margin-right: 6px; vertical-align: 1px; }
+  .tab.active .tab-num { color: var(--terracotta); }
+  .panel { display: none; animation: fade 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .overview-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+  @media (max-width: 760px) { .overview-grid { grid-template-columns: 1fr; } }
+  .lede { font-family: var(--serif); font-size: 22px; line-height: 1.35; color: var(--ink); font-weight: 300; margin: 0 0 20px; font-variation-settings: "opsz" 60; }
+  .lede em { color: var(--terracotta); font-style: italic; }
+  .week-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+  @media (max-width: 640px) { .week-strip { grid-template-columns: 1fr; } }
+  .day-pill { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 12px; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .day-pill:hover { border-color: var(--terracotta); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .day-pill .dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 8px; }
+  .day-pill .dish { font-family: var(--serif); font-size: 15px; line-height: 1.25; font-weight: 400; }
+  .day-pill .meta { font-size: 11px; color: var(--ink-soft); margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+  .day-pill .badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .badge.iron { background: var(--terracotta); color: white; }
+  .badge.folate { background: var(--olive); color: white; }
+  .callout { background: var(--bg-card); border-left: 3px solid var(--olive); padding: 16px 18px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+  .callout h4 { margin: 0 0 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--olive-deep); font-weight: 500; }
+  .callout p { margin: 0; font-size: 14px; }
+  .callout.warn { border-left-color: var(--gold); }
+  .callout.warn h4 { color: var(--gold); }
+  .callout.preg { border-left-color: var(--plum); }
+  .callout.preg h4 { color: var(--plum-deep); }
+  .sidebar-card { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; }
+  .sidebar-card h3 { font-family: var(--serif); font-weight: 400; font-size: 20px; margin: 0 0 12px; }
+  .sidebar-card p { font-size: 13px; color: var(--ink-soft); }
+  .sidebar-card ul { padding-left: 18px; font-size: 13px; }
+  .sidebar-card li { margin-bottom: 6px; }
+  .perishable-input { background: var(--bg); border: 1px dashed var(--rule); border-radius: 6px; padding: 14px; margin-top: 12px; }
+  .perishable-input textarea { width: 100%; border: 1px solid var(--rule); border-radius: 4px; padding: 8px; font-family: var(--sans); font-size: 13px; resize: vertical; min-height: 60px; background: white; }
+  .perishable-input button { background: var(--olive); color: white; border: none; padding: 8px 14px; border-radius: 4px; font-family: var(--sans); font-size: 12px; font-weight: 500; margin-top: 8px; cursor: pointer; letter-spacing: 0.03em; }
+  .perishable-input button:hover { background: var(--olive-deep); }
+  .perishable-output { margin-top: 10px; font-size: 13px; color: var(--olive-deep); line-height: 1.5; }
+  .recipe-layout { display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-layout { grid-template-columns: 1fr; } }
+  .recipe-nav { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--rule); padding-right: 16px; }
+  @media (max-width: 760px) { .recipe-nav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 0 12px; } }
+  .recipe-nav-item { background: transparent; border: none; text-align: left; padding: 12px 10px; cursor: pointer; border-radius: 4px; transition: all 0.15s; color: var(--ink-soft); border-left: 2px solid transparent; min-width: 0; }
+  @media (max-width: 760px) { .recipe-nav-item { border-left: none; border-bottom: 2px solid transparent; min-width: 140px; } }
+  .recipe-nav-item:hover { background: var(--bg-card); color: var(--ink); }
+  .recipe-nav-item.active { color: var(--terracotta-deep); border-left-color: var(--terracotta); background: var(--bg-card); }
+  @media (max-width: 760px) { .recipe-nav-item.active { border-left-color: transparent; border-bottom-color: var(--terracotta); } }
+  .recipe-nav-item .nav-dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; display: block; }
+  .recipe-nav-item .nav-dish { font-family: var(--serif); font-size: 14px; line-height: 1.2; }
+  .recipe { display: none; }
+  .recipe.active { display: block; animation: fade 0.25s ease; }
+  .recipe-head { border-bottom: 1px solid var(--rule); padding-bottom: 16px; margin-bottom: 20px; }
+  .recipe-head .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--terracotta); margin-bottom: 8px; }
+  .recipe-head h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4vw, 38px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -0.01em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .recipe-head .source { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+  .recipe-stats { display: flex; gap: 24px; margin-top: 14px; flex-wrap: wrap; }
+  .stat { font-size: 12px; color: var(--ink-soft); }
+  .stat strong { color: var(--ink); font-weight: 500; display: block; font-size: 14px; font-family: var(--serif); }
+  .recipe-body { display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-body { grid-template-columns: 1fr; } }
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--terracotta); margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .ingredients ul { list-style: none; padding: 0; margin: 0; }
+  .ingredients li { padding: 6px 0; border-bottom: 1px dotted var(--rule); font-size: 14px; line-height: 1.4; }
+  .ingredients li:last-child { border-bottom: none; }
+  .ingredients .amount { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--terracotta-deep); margin-right: 8px; font-weight: 500; }
+  .ingredients .pantry-note { font-size: 11px; color: var(--olive); font-style: italic; margin-left: 4px; }
+  .steps { counter-reset: step; }
+  .step { counter-increment: step; padding: 12px 0 12px 36px; position: relative; font-size: 14.5px; line-height: 1.55; border-bottom: 1px solid var(--rule); }
+  .step:last-child { border-bottom: none; }
+  .step::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--terracotta); font-weight: 500; letter-spacing: 0.05em; }
+  .kid-note, .ahead-note, .preg-note { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; margin-top: 20px; font-size: 13.5px; }
+  .kid-note { border-left: 3px solid var(--gold); }
+  .ahead-note { border-left: 3px solid var(--olive); }
+  .preg-note { border-left: 3px solid var(--plum); }
+  .kid-note strong, .ahead-note strong, .preg-note strong { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; display: block; margin-bottom: 6px; }
+  .kid-note strong { color: var(--gold); }
+  .ahead-note strong { color: var(--olive-deep); }
+  .preg-note strong { color: var(--plum-deep); }
+  .grocery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grocery-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .grocery-section h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; justify-content: space-between; }
+  .grocery-section h3 .count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--terracotta); letter-spacing: 0.1em; }
+  .grocery-section ul { list-style: none; padding: 0; margin: 0; }
+  .grocery-section li { padding: 8px 0; font-size: 13.5px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; cursor: pointer; user-select: none; }
+  .grocery-section li.checked { color: var(--ink-soft); text-decoration: line-through; text-decoration-thickness: 1px; opacity: 0.55; }
+  .grocery-section .check-box { width: 14px; height: 14px; border: 1.5px solid var(--ink-soft); border-radius: 3px; flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .grocery-section li.checked .check-box { background: var(--terracotta); border-color: var(--terracotta); }
+  .grocery-section li.checked .check-box::after { content: '\2713'; color: white; font-size: 11px; line-height: 1; }
+  .item-amt { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); display: block; margin-top: 1px; }
+  .tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.06em; vertical-align: 1px; text-transform: uppercase; }
+  .tag.have { background: var(--ghost); color: var(--ink-soft); }
+  .tag.d1 { background: var(--olive); color: white; }
+  .grocery-note { background: var(--bg-card); border: 1px solid var(--rule); border-left: 3px solid var(--terracotta); border-radius: 0 4px 4px 0; padding: 16px 18px; margin-bottom: 24px; font-size: 13.5px; }
+  .grocery-note strong { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta-deep); margin-bottom: 6px; }
+  .prep-timeline { position: relative; padding-left: 28px; }
+  .prep-timeline::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px; width: 1px; background: var(--rule); }
+  .prep-event { position: relative; margin-bottom: 28px; }
+  .prep-event::before { content: ''; position: absolute; left: -25px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--terracotta); }
+  .prep-event.start::before { background: var(--terracotta); }
+  .prep-event.delivery::before { background: var(--blue); border-color: var(--blue); border-radius: 2px; }
+  .prep-event h3 { font-family: var(--serif); font-weight: 400; font-size: 22px; margin: 0 0 4px; line-height: 1.2; }
+  .prep-event.delivery h3 { color: var(--blue-deep); }
+  .prep-event .when { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 12px; }
+  .prep-event.delivery .when { color: var(--blue); }
+  .prep-event .duration { color: var(--ink-soft); margin-left: 6px; text-transform: none; letter-spacing: 0; }
+  .prep-event ul { list-style: none; padding: 0; margin: 0; }
+  .prep-event li { padding: 6px 0 6px 18px; font-size: 14px; position: relative; line-height: 1.5; }
+  .prep-event li::before { content: '\2192'; position: absolute; left: 0; color: var(--terracotta); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .prep-event.delivery li::before { color: var(--blue); }
+  .prep-event li.for { color: var(--ink-soft); font-size: 12px; padding-top: 0; padding-bottom: 4px; font-style: italic; }
+  .prep-event li.for::before { display: none; }
+  .pantry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .pantry-grid { grid-template-columns: 1fr; } }
+  .pantry-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .pantry-section h3 { font-family: var(--serif); font-size: 19px; margin: 0 0 12px; font-weight: 400; }
+  .pantry-section ul { padding-left: 18px; font-size: 13.5px; line-height: 1.7; }
+  @media print {
+    body { background: white; }
+    .meal-planner { padding: 20px; max-width: none; }
+    .tabs { display: none; }
+    .panel { display: block !important; page-break-before: always; }
+    .panel:first-of-type { page-break-before: avoid; }
+    .recipe { display: block !important; page-break-before: always; }
+    .recipe-nav { display: none; }
+    .recipe-layout { grid-template-columns: 1fr; }
+    .day-pill { box-shadow: none; }
+  }
+</style>
+
+<div class="meal-planner">
+  <header class="mast">
+    <h1 class="mast-title">Three <em>Nights</em></h1>
+    <div class="mast-meta">
+      <strong>Mon 6/29 &mdash; Wed 7/1, 2026</strong>
+      Family of four &middot; NW DC
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview"><span class="tab-num">01</span>Overview</button>
+    <button class="tab" data-tab="recipes"><span class="tab-num">02</span>Recipes</button>
+    <button class="tab" data-tab="grocery"><span class="tab-num">03</span>Grocery List</button>
+    <button class="tab" data-tab="prep"><span class="tab-num">04</span>Prep Schedule</button>
+    <button class="tab" data-tab="pantry"><span class="tab-num">05</span>Pantry &amp; Notes</button>
+  </nav>
+
+  <section class="panel active" data-panel="overview">
+    <div class="overview-grid">
+      <div>
+        <p class="lede">Three pregnancy-safe dinners built around your ingredients &mdash; the <em>beef, black beans, and red pepper</em> all land together in Monday's loaded skillet, the salmon braises gently on Tuesday, and a Sicilian eggplant pasta closes it out.</p>
+
+        <div class="week-strip">
+          <div class="day-pill" onclick="goToRecipe(0)">
+            <div class="dow">Mon 6/29</div>
+            <div class="dish">Loaded Beef &amp; Black Bean Skillet with Red Pepper</div>
+            <div class="meta">30 min &middot; skillet to oven</div>
+            <div class="badges"><span class="badge iron">Iron</span><span class="badge folate">Folate</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(1)">
+            <div class="dow">Tue 6/30</div>
+            <div class="dish">Salmon Chraimeh (braised in spiced tomato)</div>
+            <div class="meta">20 min &middot; skillet</div>
+            <div class="badges"><span class="badge folate">Omega-3</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(2)">
+            <div class="dow">Wed 7/1</div>
+            <div class="dish">Pasta alla Norma</div>
+            <div class="meta">45 min, mostly hands-off &middot; oven + stovetop</div>
+            <div class="badges"><span class="badge folate">Veg</span></div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <h4>Your ingredients, mapped</h4>
+          <p><strong>1 lb ground beef + canned black beans + 1 red pepper:</strong> all three go into Monday's loaded skillet bake. <strong>24 oz salmon</strong> (four 6-oz fillets): Tuesday's chraimeh, braised through to a safe doneness. Wednesday's pasta uses pantry and fresh produce only &mdash; a good vegetarian palate-cleanser for the short week.</p>
+        </div>
+
+        <div class="callout preg">
+          <h4>Pregnancy-safe</h4>
+          <p>All three are built to the same standard as last week: beef cooked fully to 160&deg;F, salmon braised through to 145&deg;F (the recipe's note tells you exactly how), no alcohol, only cooked/hard cheeses. Monday's beef-and-bean skillet is especially strong on iron and folate &mdash; both important right now. The salmon brings DHA omega-3s.</p>
+        </div>
+
+        <div class="callout warn">
+          <h4>If nausea or aversions are in play</h4>
+          <p>First-trimester appetite can be unpredictable. If the pregnant adult isn't up for a strong-flavored meal on a given night, Monday's skillet and Wednesday's pasta both reheat well as leftovers, and the salmon is gentle. Don't force it &mdash; swap nights freely. Tell me next week if blander or smaller meals would help and I'll plan that way.</p>
+        </div>
+
+        <div class="callout">
+          <h4>About this week's books</h4>
+          <p>Tuesday's Salmon Chraimeh and Wednesday's Pasta alla Norma are from <em>Milk Street: Tuesday Nights</em> (Kimball, 2018). Monday's loaded skillet is a generated recipe &mdash; it adapts the structure of the Cheesy, Spicy Black Bean Bake from <em>Easy Weeknight Dinners</em> (Ali Slagle) by adding browned beef and red pepper. It's flagged as generated, not a direct extraction.</p>
+        </div>
+      </div>
+
+      <aside>
+        <div class="sidebar-card">
+          <h3>Got perishables to use up?</h3>
+          <p>Tell me what's about to spoil and I'll rework next week around it.</p>
+          <div class="perishable-input">
+            <textarea id="perishables" placeholder="e.g., half a bunch of cilantro, 1 zucchini, 6 oz mushrooms&hellip;"></textarea>
+            <button onclick="logPerishables()">Note it for next week</button>
+            <div class="perishable-output" id="perish-out"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-card" style="margin-top:20px">
+          <h3>Buy tonight, delivered tomorrow</h3>
+          <ul>
+            <li>You're ordering tonight for tomorrow (Mon) delivery &mdash; the Grocery tab is one list, all in a single order.</li>
+            <li>The salmon is used Tuesday, so it holds fine in the fridge one day; no need to freeze unless you want to.</li>
+            <li>Eggplant for Wednesday keeps well 3&ndash;4 days.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="recipes">
+    <div class="recipe-layout">
+      <nav class="recipe-nav" id="recipe-nav">
+        <button class="recipe-nav-item active" data-recipe="0"><span class="nav-dow">Mon 6/29</span><span class="nav-dish">Beef &amp; Black Bean Skillet</span></button>
+        <button class="recipe-nav-item" data-recipe="1"><span class="nav-dow">Tue 6/30</span><span class="nav-dish">Salmon Chraimeh</span></button>
+        <button class="recipe-nav-item" data-recipe="2"><span class="nav-dow">Wed 7/1</span><span class="nav-dish">Pasta alla Norma</span></button>
+      </nav>
+
+      <div class="recipe-content">
+
+        <article class="recipe active" data-recipe="0">
+          <div class="recipe-head">
+            <div class="eyebrow">Monday &middot; Tex-Mex</div>
+            <h2>Loaded Beef &amp; Black Bean<br>Skillet with Red Pepper</h2>
+            <div class="source"><strong>Generated recipe</strong> &mdash; adapts the structure of the Cheesy, Spicy Black Bean Bake from <em>Easy Weeknight Dinners</em> (Ali Slagle) with browned ground beef and red pepper added. Not a direct extraction.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>30 min</strong>total</div>
+              <div class="stat"><strong>25 min</strong>active</div>
+              <div class="stat"><strong>Oven 475&deg;F</strong>oven-safe skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">2 Tbsp</span>extra-virgin olive oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 lb</span>ground beef (90% lean) <span class="pantry-note">(your beef)</span></li>
+                  <li><span class="amount">1</span>red bell pepper, stemmed, seeded, diced <span class="pantry-note">(your red pepper)</span></li>
+                  <li><span class="amount">1</span>yellow onion, finely chopped</li>
+                  <li><span class="amount">5 cloves</span>garlic, sliced</li>
+                  <li><span class="amount">&frac14; cup</span>tomato paste</li>
+                  <li><span class="amount">1&frac12; tsp</span>smoked paprika</li>
+                  <li><span class="amount">1 tsp</span>ground cumin</li>
+                  <li><span class="amount">&frac14; tsp</span>red pepper flakes <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2 (14-oz) cans</span>black beans, drained &amp; rinsed <span class="pantry-note">(your black beans)</span></li>
+                  <li><span class="amount">&frac12; cup</span>boiling water</li>
+                  <li><span class="amount">1&frac12; cups</span>grated sharp Cheddar (6 oz)</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>warm tortillas, rice, or a green salad; cilantro</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Heat the oven to 475&deg;F. In a 10&ndash;12" oven-safe skillet, heat the olive oil over medium-high. Add the ground beef and a pinch of salt; cook, breaking it up, until browned and fully cooked through with no pink, 6&ndash;7 min. <strong>Pregnancy:</strong> cook to 160&deg;F. Use a slotted spoon to move the beef to a bowl, leaving the fat in the skillet.</div>
+                <div class="step">Add the diced red pepper and onion to the skillet. Cook, stirring, until softened and starting to brown, about 5 min. Add the sliced garlic and cook 1 min more.</div>
+                <div class="step">Stir in the tomato paste, smoked paprika, cumin, and red pepper flakes. Fry 30 seconds, lowering the heat as needed so the garlic and paste don't burn.</div>
+                <div class="step">Return the beef to the skillet. Add the black beans, boiling water, and generous pinches of salt and pepper. Stir to combine and bring to a simmer.</div>
+                <div class="step">Sprinkle the cheese evenly over the top. Transfer the skillet to the oven and bake until the cheese melts and bubbles, 5&ndash;10 min. For more browning, run under the broiler 1&ndash;2 min.</div>
+                <div class="step">Scatter with cilantro and serve with tortillas, rice, or a green salad.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Brown the beef fully (160&deg;F, no pink) before it goes back in for the bake. Iron and folate together here &mdash; beef plus black beans &mdash; with the tomato paste and red pepper providing vitamin C to boost iron absorption. The cheese is cooked. A genuinely nutritious, easy first-trimester meal.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (tomorrow once groceries arrive, ~5 min)</strong>
+                Dice the red pepper and onion; slice the garlic; grate the cheese. Drain and rinse the beans. Everything else is a fast same-night cook. Nothing needs doing tonight.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Black beans are a known kid favorite. This has red pepper flakes &mdash; scoop a small portion for the 13-mo <em>before</em> the spices go in (or use a light hand), mash the beans slightly, and cut the beef fine. For the 34-mo, serve with a tortilla to scoop; the melted cheese is a reliable win. Both kids get a good iron hit from this one.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="1">
+          <div class="recipe-head">
+            <div class="eyebrow">Tuesday &middot; North African / Sephardic</div>
+            <h2>Salmon Chraimeh</h2>
+            <div class="source">From <em>Milk Street: Tuesday Nights</em> by Christopher Kimball (2018). Salmon braised in a spiced tomato sauce.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>20 min</strong>total</div>
+              <div class="stat"><strong>20 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>10" skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">4 (6 oz)</span>skin-on center-cut salmon fillets, 1&ndash;1&frac12;" thick <span class="pantry-note">(your 24 oz salmon)</span></li>
+                  <li><span class="amount">1 Tbsp</span>olive oil, plus more to serve <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">4</span>scallions, thinly sliced (dark green parts reserved)</li>
+                  <li><span class="amount">3 cloves</span>garlic, thinly sliced</li>
+                  <li><span class="amount">&frac12;</span>red bell pepper, seeded &amp; thinly sliced <span class="pantry-note">(uses the other half of Monday's pepper, OR a fresh one)</span></li>
+                  <li><span class="amount">1 tsp</span>coriander seeds (or &frac34; tsp ground)</li>
+                  <li><span class="amount">1 tsp</span>cumin seeds (or &frac34; tsp ground)</li>
+                  <li><span class="amount">&frac34; tsp</span>smoked paprika</li>
+                  <li><span class="amount">14&frac12;-oz can</span>diced tomatoes</li>
+                  <li><span class="amount">2 Tbsp</span>finely chopped fresh mint</li>
+                  <li><span class="amount">&frac14; cup</span>fresh cilantro, chopped</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>lemon wedges; rice or crusty bread</li>
+                </ul>
+                <p style="font-size:11px;color:var(--ink-soft);margin-top:8px;font-style:italic">Note: the original uses a sliced jalape&ntilde;o for heat. I've swapped in red bell pepper for a mild, pregnancy-friendly version &mdash; add a pinch of red pepper flakes if you want some warmth.</p>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Season the salmon on both sides with salt and pepper.</div>
+                <div class="step">In a 10" skillet over medium-high, heat the oil until shimmering. Add the white and light-green scallion parts, garlic, and sliced red pepper. Cook, stirring occasionally, until lightly browned, about 2 min.</div>
+                <div class="step">Stir in the coriander, cumin, and smoked paprika; cook until fragrant, about 30 seconds.</div>
+                <div class="step">Stir in the diced tomatoes (with juices), &frac12; tsp salt, and &frac14; tsp pepper. Bring to a simmer, then nestle the fillets skin-side up in the sauce. Reduce to medium, cover, and simmer 6&ndash;8 min.</div>
+                <div class="step"><strong>Pregnancy:</strong> cook the salmon fully through &mdash; to 145&deg;F and opaque, not the medium the original targets. After the 6&ndash;8 min simmer, if it's not fully cooked, take the pan off heat and leave the fillets in the covered pan a few minutes more until done (the recipe's own note suggests exactly this for well-done fish).</div>
+                <div class="step">Using tongs, peel off and discard the skin; transfer the fillets flesh-side up to plates. If the sauce is watery, simmer it 1&ndash;2 min to thicken. Off heat, stir in the mint and cilantro; taste and season.</div>
+                <div class="step">Spoon the sauce over the salmon, sprinkle with the reserved scallion greens, drizzle with olive oil, and serve with lemon wedges and rice or bread.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Salmon is a top pregnancy fish &mdash; low-mercury, high in DHA. The only change from the book: cook it fully to 145&deg;F (opaque, flakes easily) rather than the 115&ndash;120&deg;F medium it calls for. The recipe conveniently tells you how to get there (rest covered off-heat). No alcohol; all spices are fine.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Monday evening, ~5 min)</strong>
+                Slice the scallions (keep greens separate), garlic, and red pepper. Chop the mint and cilantro; store covered. Tuesday is then a 20-min cook start to finish &mdash; one of the fastest nights you'll have.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                This mild version (no jalape&ntilde;o) is gentle enough for both kids. Flake a portion of cooked salmon, checking carefully for pin bones. The tomato sauce is fine &mdash; spoon a little over their fish or rice. For the 13-mo, skip the lemon (acidic) and go easy on the herbs. Salmon's omega-3s are great for them too.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="2">
+          <div class="recipe-head">
+            <div class="eyebrow">Wednesday &middot; Sicilian &middot; Vegetarian</div>
+            <h2>Pasta alla Norma</h2>
+            <div class="source">From <em>Milk Street: Tuesday Nights</em> by Christopher Kimball (2018). Roasted eggplant &amp; tomato pasta.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>45 min total</strong>(eggplant roasts 30 unattended)</div>
+              <div class="stat"><strong>20 min</strong>active</div>
+              <div class="stat"><strong>Oven 475&deg;F + stovetop</strong></div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">1 lb</span>eggplant, peeled &amp; cut into &frac34;" cubes</li>
+                  <li><span class="amount">6 Tbsp</span>extra-virgin olive oil, divided <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">12 oz</span>penne rigate or mezze rigatoni</li>
+                  <li><span class="amount">8 cloves</span>garlic, finely chopped</li>
+                  <li><span class="amount">&frac12; tsp</span>red pepper flakes <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2 pints</span>grape tomatoes</li>
+                  <li><span class="amount">2 Tbsp</span>white balsamic vinegar (or regular)</li>
+                  <li><span class="amount">&frac12; cup</span>fresh basil, roughly chopped</li>
+                  <li><span class="amount">2 oz</span>ricotta salata, shredded (1 cup) &mdash; or pasteurized feta</li>
+                  <li><span class="amount">&mdash;</span>kosher salt <span class="pantry-note">(pantry)</span></li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Heat the oven to 475&deg;F, rack in the upper-middle. Line a rimmed baking sheet with parchment. Toss the eggplant with 1&frac12; tsp salt and 4 Tbsp of the oil. Spread in a single layer and roast until browned and tender, 30&ndash;35 min, stirring midway. <em>(This is the unattended stretch &mdash; do the rest while it roasts.)</em></div>
+                <div class="step">Bring a large pot of water to a boil. Add the pasta and 2 Tbsp salt; cook until al dente. Reserve about &frac12; cup pasta water, then drain.</div>
+                <div class="step">While the eggplant roasts and water heats: in a 12" skillet over medium-high, heat the remaining 2 Tbsp oil. Add the garlic and red pepper flakes; cook until fragrant, about 30 seconds. Add the grape tomatoes and 1&frac12; tsp salt; cover and cook, shaking occasionally, until they start to release liquid, about 1 min.</div>
+                <div class="step">Stir in the vinegar, then crush the tomatoes with the back of a spoon. Cover, reduce to medium, and cook, stirring, until it breaks down into a lightly thickened sauce, 8&ndash;9 min.</div>
+                <div class="step">Add the drained pasta, roasted eggplant, and &frac14; cup of the reserved pasta water to the tomatoes. Cook over medium, stirring, until the sauce clings to the pasta, 2&ndash;3 min. Add more pasta water if it's dry. Taste and season.</div>
+                <div class="step">Stir in half the basil. Transfer to a bowl, top with the remaining basil and the shredded ricotta salata. Serve.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Fully vegetarian and pregnancy-safe. Ricotta salata is a firm, aged cheese &mdash; fine during pregnancy. If you substitute feta, just check it's pasteurized (most US feta is). No other concerns. A lighter night, which can be welcome if the first trimester is making heavy or meaty meals less appealing.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Tuesday evening, ~5 min)</strong>
+                Peel and cube the eggplant (store submerged in lightly salted water to prevent browning, then drain and pat dry before roasting). Chop the garlic. The dish otherwise comes together same-night while the eggplant roasts.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Soft roasted eggplant and pasta in a mild tomato sauce is easy for both kids. There's &frac12; tsp red pepper flakes in the whole dish &mdash; mild, but for the 13-mo you can pull a portion before adding them. Cut the pasta small for the 13-mo. The shredded cheese on top is a kid win; go light if it's a saltier feta.
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="grocery">
+    <div class="grocery-note">
+      <strong>Order tonight for tomorrow delivery</strong>
+      One order covers all three nights. Items you told me you already have are marked separately &mdash; no need to re-buy. The salmon is used Tuesday, so it keeps fine in the fridge one day.
+    </div>
+
+    <div class="grocery-grid">
+      <div class="grocery-section">
+        <h3>You already have <span class="count">your ingredients</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Ground beef, 1 lb <span class="tag have">have</span><span class="item-amt">for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Salmon, 24 oz (4 fillets) <span class="tag have">have</span><span class="item-amt">for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Canned black beans <span class="tag have">have</span><span class="item-amt">need 2 cans for Monday &mdash; buy more if you only have 1</span></span></li>
+          <li><span class="check-box"></span><span>Red bell pepper <span class="tag have">have</span><span class="item-amt">Monday uses 1 whole; Tuesday uses &frac12; &mdash; buy 1 more if you want Tuesday's pepper fresh</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Produce to buy <span class="count">8 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Yellow onion <span class="tag d1">D1</span><span class="item-amt">1 &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Garlic <span class="tag d1">D1</span><span class="item-amt">2 heads &middot; all three nights (Wed uses 8 cloves)</span></span></li>
+          <li><span class="check-box"></span><span>Scallions <span class="tag d1">D1</span><span class="item-amt">1 bunch &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Eggplant <span class="tag d1">D1</span><span class="item-amt">1 lb (1 medium-large) &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Grape tomatoes <span class="tag d1">D1</span><span class="item-amt">2 pints &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh basil <span class="tag d1">D1</span><span class="item-amt">1 bunch (&frac12; cup) &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh mint <span class="tag d1">D1</span><span class="item-amt">small bunch (2 Tbsp) &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh cilantro <span class="tag d1">D1</span><span class="item-amt">1 bunch &middot; Mon garnish + Tue</span></span></li>
+          <li><span class="check-box"></span><span>Lemon <span class="tag d1">D1</span><span class="item-amt">1 &middot; for Tuesday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Dairy <span class="count">2 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Sharp Cheddar <span class="tag d1">D1</span><span class="item-amt">6 oz (1&frac12; cups grated) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Ricotta salata (or pasteurized feta) <span class="tag d1">D1</span><span class="item-amt">2 oz &middot; for Wednesday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Canned &amp; Dry <span class="count">4 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Canned diced tomatoes <span class="tag d1">D1</span><span class="item-amt">1 (14&frac12;-oz) can &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Tomato paste <span class="tag d1">D1</span><span class="item-amt">small can/tube (&frac14; cup) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Penne rigate or mezze rigatoni <span class="tag d1">D1</span><span class="item-amt">12 oz &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>White balsamic vinegar <span class="tag d1">D1</span><span class="item-amt">small bottle (or use regular balsamic) &middot; for Wednesday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Spices &mdash; check what you have <span class="count">mostly carryover</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Smoked paprika <span class="tag d1">D1</span><span class="item-amt">Mon + Tue &middot; likely have</span></span></li>
+          <li><span class="check-box"></span><span>Ground cumin + cumin seeds <span class="tag d1">D1</span><span class="item-amt">Mon (ground) + Tue (seeds, or use ground)</span></span></li>
+          <li><span class="check-box"></span><span>Coriander seeds <span class="tag d1">D1</span><span class="item-amt">Tue (or use ground coriander)</span></span></li>
+          <li><span class="check-box"></span><span>Red pepper flakes <span class="tag have">have</span><span class="item-amt">Mon + Wed</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>You likely have <span class="count">pantry</span></h3>
+        <ul style="color:var(--ink-soft);font-style:italic">
+          <li><span style="opacity:.4">&middot;</span> Olive oil</li>
+          <li><span style="opacity:.4">&middot;</span> Kosher salt &amp; black pepper</li>
+          <li><span style="opacity:.4">&middot;</span> Rice (Mon + Tue serving)</li>
+          <li><span style="opacity:.4">&middot;</span> Tortillas or crusty bread (optional)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="prep">
+    <p class="lede">Groceries arrive tomorrow (Mon). No Sunday cook &mdash; just a couple of fast same-evening prep steps. The longest night is Wednesday, and most of that is the eggplant roasting unattended.</p>
+
+    <div class="prep-timeline">
+      <div class="prep-event delivery">
+        <div class="when">Tonight <span class="duration">&middot; order</span></div>
+        <h3>Place the order</h3>
+        <ul>
+          <li class="for">For tomorrow's delivery</li>
+          <li>One order, everything on the Grocery tab. Double-check whether you have 2 cans of black beans (Monday needs 2) and enough red pepper (Mon uses a whole one, Tue uses half).</li>
+        </ul>
+      </div>
+
+      <div class="prep-event delivery">
+        <div class="when">Mon <span class="duration">&middot; delivery lands</span></div>
+        <h3>Groceries arrive</h3>
+        <ul>
+          <li class="for">Everything for the three nights</li>
+          <li><strong>On arrival:</strong> refrigerate everything. The salmon goes in the coldest part of the fridge &mdash; it's used tomorrow, so no need to freeze.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event start">
+        <div class="when">Mon evening <span class="duration">&middot; 30 min cook (+5 min Tue prep)</span></div>
+        <h3>Beef &amp; black bean skillet</h3>
+        <ul>
+          <li class="for">Day-of for Monday</li>
+          <li>Brown the beef fully (160&deg;F), soften the red pepper + onion + garlic, bloom the tomato paste and spices, add beans, top with cheese, bake. Serve with tortillas or rice.</li>
+          <li><strong>While you're at it (5 min for Tuesday):</strong> slice the scallions, garlic, and red pepper for the salmon; chop the mint and cilantro. Store covered.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Tue evening <span class="duration">&middot; 20 min cook (+5 min Wed prep)</span></div>
+        <h3>Salmon chraimeh</h3>
+        <ul>
+          <li class="for">Day-of for Tuesday</li>
+          <li>Brown the aromatics, bloom the spices, add tomatoes, nestle in the salmon, braise covered until fully cooked (145&deg;F). Finish with herbs; serve with rice or bread.</li>
+          <li><strong>While you're at it (5 min for Wednesday):</strong> peel and cube the eggplant (hold in lightly salted water); chop the garlic.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Wed evening <span class="duration">&middot; 45 min (30 unattended)</span></div>
+        <h3>Pasta alla Norma</h3>
+        <ul>
+          <li class="for">Day-of for Wednesday</li>
+          <li>Roast the eggplant (30&ndash;35 min, hands-off). While it roasts: boil the pasta, make the quick grape-tomato sauce. Toss everything together, finish with basil and ricotta salata.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event" style="opacity:.7">
+        <div class="when">Wed night <span class="duration">&middot; when you're ready</span></div>
+        <h3>The reward</h3>
+        <ul>
+          <li class="for">Three nights, done</li>
+          <li>Iron-rich Monday, omega-3 Tuesday, a light vegetarian Wednesday &mdash; all pregnancy-safe.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="pantry">
+    <div class="pantry-grid">
+      <div class="pantry-section">
+        <h3>Pregnancy food-safety, the working rules</h3>
+        <ul>
+          <li><strong>Meat:</strong> ground beef fully cooked to 160&deg;F, no pink.</li>
+          <li><strong>Fish:</strong> salmon to 145&deg;F (opaque, flakes easily); low-mercury, which salmon is.</li>
+          <li><strong>Cheese:</strong> Cheddar (hard) and ricotta salata (firm aged) are both fine; if subbing feta, check it's pasteurized.</li>
+          <li><strong>No alcohol</strong> in any of these dishes.</li>
+          <li><strong>Wash produce</strong> well, especially the herbs and tomatoes.</li>
+        </ul>
+        <p style="color:var(--ink-soft);font-size:12px;font-style:italic;margin-top:10px">General guidance, not medical advice &mdash; defer to your OB/midwife, especially on fish frequency.</p>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Iron, folate &amp; omega-3 this week</h3>
+        <ul>
+          <li><strong>Iron:</strong> beef + black beans (Mon) is the big one; eggplant and tomatoes add a little (Wed).</li>
+          <li><strong>Folate:</strong> black beans (Mon), plus all the fresh herbs and the tomato-forward dishes.</li>
+          <li><strong>Omega-3 (DHA):</strong> salmon (Tue).</li>
+          <li><strong>Absorption tip:</strong> the red pepper, tomato, and lemon across these meals supply vitamin C, which boosts iron uptake from the beans and beef.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Working with the kids</h3>
+        <ul>
+          <li><strong>Mon (beef &amp; bean skillet):</strong> scoop a portion before the red pepper flakes for the 13-mo; mash beans; the cheese is a win.</li>
+          <li><strong>Tue (salmon chraimeh):</strong> mild (no jalape&ntilde;o version); flake salmon and check for pin bones.</li>
+          <li><strong>Wed (pasta alla Norma):</strong> soft eggplant + pasta is easy; cut pasta small for the 13-mo.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Substitutions, if Fresh is missing something</h3>
+        <ul>
+          <li><strong>Ricotta salata (Wed):</strong> pasteurized feta (the book's own suggested sub), or grated Parmesan.</li>
+          <li><strong>White balsamic (Wed):</strong> regular balsamic, or red wine vinegar + a pinch of sugar.</li>
+          <li><strong>Cumin/coriander seeds (Tue):</strong> ground works &mdash; use about &frac34; as much.</li>
+          <li><strong>Eggplant (Wed):</strong> zucchini roasts similarly if eggplant's unavailable, though the texture is different.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section" style="grid-column: 1 / -1;">
+        <h3>For next week</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px">Tell me:</p>
+        <ul>
+          <li>Any perishables to use up (likely: basil, mint, cilantro, half a pepper, extra cheese)</li>
+          <li>How the pregnant adult's appetite is &mdash; if nausea, aversions, or specific cravings are shaping what sounds good, I'll plan around them (blander, smaller, more snack-style, or specific cravings)</li>
+          <li>Kid wins / refusals</li>
+          <li>How many nights you need, and any ingredients to use up</li>
+          <li>Specific Amazon Fresh deals you saw</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  });
+  document.querySelectorAll('.recipe-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.recipe;
+      document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n === item));
+      document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === target));
+    });
+  });
+  function goToRecipe(idx) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'recipes'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === 'recipes'));
+    document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n.dataset.recipe === String(idx)));
+    document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === String(idx)));
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+  document.querySelectorAll('.grocery-section li').forEach(li => {
+    if (li.querySelector('.check-box')) {
+      li.addEventListener('click', () => li.classList.toggle('checked'));
+    }
+  });
+  function logPerishables() {
+    const txt = document.getElementById('perishables').value.trim();
+    const out = document.getElementById('perish-out');
+    if (!txt) { out.textContent = ''; return; }
+    out.innerHTML = '<strong>Noted:</strong> ' + txt.replace(/\n/g, '<br>') + '<br><br><em>Bring this to next week\'s planning conversation and I\'ll work these into the recipes.</em>';
+  }
+</script>
