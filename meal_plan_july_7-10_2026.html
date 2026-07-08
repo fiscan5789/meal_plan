@@ -1,0 +1,668 @@
+<!-- Meal Plan: Tue, Wed, Fri - July 7, 8, 10, 2026 -->
+<meta charset="UTF-8">
+<style>
+  :root {
+    --bg: #f7f1e6; --bg-card: #fffaf2; --ink: #2a2521; --ink-soft: #5a4e44;
+    --rule: #d9cdb8; --terracotta: #b85432; --terracotta-deep: #8e3e22;
+    --olive: #5a6b3a; --olive-deep: #3f4a28; --gold: #c89942;
+    --blue: #3a6280; --blue-deep: #234561; --plum: #7a4a6b; --plum-deep: #5a3450;
+    --ghost: #ebe1cb;
+    --shadow: 0 1px 0 rgba(42,37,33,0.04), 0 8px 24px -12px rgba(42,37,33,0.18);
+    --serif: "Fraunces", "Cormorant Garamond", Georgia, serif;
+    --sans: "Sohne", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; }
+  body, .meal-planner { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .meal-planner { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+  .mast { border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .mast-title { font-family: var(--serif); font-weight: 400; margin: 0; font-size: clamp(36px, 5vw, 58px); line-height: 0.95; letter-spacing: -0.02em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .mast-title em { font-style: italic; color: var(--terracotta); font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1; }
+  .mast-meta { text-align: right; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); line-height: 1.6; }
+  .mast-meta strong { color: var(--ink); display: block; font-weight: 500; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid var(--rule); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { background: transparent; border: none; padding: 14px 18px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-soft); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s ease; white-space: nowrap; letter-spacing: 0.02em; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--terracotta-deep); border-bottom-color: var(--terracotta); }
+  .tab-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ghost); margin-right: 6px; vertical-align: 1px; }
+  .tab.active .tab-num { color: var(--terracotta); }
+  .panel { display: none; animation: fade 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .overview-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+  @media (max-width: 760px) { .overview-grid { grid-template-columns: 1fr; } }
+  .lede { font-family: var(--serif); font-size: 22px; line-height: 1.35; color: var(--ink); font-weight: 300; margin: 0 0 20px; font-variation-settings: "opsz" 60; }
+  .lede em { color: var(--terracotta); font-style: italic; }
+  .week-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+  @media (max-width: 640px) { .week-strip { grid-template-columns: 1fr; } }
+  .day-pill { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 12px; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .day-pill:hover { border-color: var(--terracotta); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .day-pill .dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 8px; }
+  .day-pill .dish { font-family: var(--serif); font-size: 15px; line-height: 1.25; font-weight: 400; }
+  .day-pill .meta { font-size: 11px; color: var(--ink-soft); margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+  .day-pill .badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .badge.iron { background: var(--terracotta); color: white; }
+  .badge.folate { background: var(--olive); color: white; }
+  .callout { background: var(--bg-card); border-left: 3px solid var(--olive); padding: 16px 18px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+  .callout h4 { margin: 0 0 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--olive-deep); font-weight: 500; }
+  .callout p { margin: 0; font-size: 14px; }
+  .callout.warn { border-left-color: var(--gold); }
+  .callout.warn h4 { color: var(--gold); }
+  .callout.preg { border-left-color: var(--plum); }
+  .callout.preg h4 { color: var(--plum-deep); }
+  .sidebar-card { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; }
+  .sidebar-card h3 { font-family: var(--serif); font-weight: 400; font-size: 20px; margin: 0 0 12px; }
+  .sidebar-card p { font-size: 13px; color: var(--ink-soft); }
+  .sidebar-card ul { padding-left: 18px; font-size: 13px; }
+  .sidebar-card li { margin-bottom: 6px; }
+  .perishable-input { background: var(--bg); border: 1px dashed var(--rule); border-radius: 6px; padding: 14px; margin-top: 12px; }
+  .perishable-input textarea { width: 100%; border: 1px solid var(--rule); border-radius: 4px; padding: 8px; font-family: var(--sans); font-size: 13px; resize: vertical; min-height: 60px; background: white; }
+  .perishable-input button { background: var(--olive); color: white; border: none; padding: 8px 14px; border-radius: 4px; font-family: var(--sans); font-size: 12px; font-weight: 500; margin-top: 8px; cursor: pointer; letter-spacing: 0.03em; }
+  .perishable-input button:hover { background: var(--olive-deep); }
+  .perishable-output { margin-top: 10px; font-size: 13px; color: var(--olive-deep); line-height: 1.5; }
+  .recipe-layout { display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-layout { grid-template-columns: 1fr; } }
+  .recipe-nav { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--rule); padding-right: 16px; }
+  @media (max-width: 760px) { .recipe-nav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 0 12px; } }
+  .recipe-nav-item { background: transparent; border: none; text-align: left; padding: 12px 10px; cursor: pointer; border-radius: 4px; transition: all 0.15s; color: var(--ink-soft); border-left: 2px solid transparent; min-width: 0; }
+  @media (max-width: 760px) { .recipe-nav-item { border-left: none; border-bottom: 2px solid transparent; min-width: 140px; } }
+  .recipe-nav-item:hover { background: var(--bg-card); color: var(--ink); }
+  .recipe-nav-item.active { color: var(--terracotta-deep); border-left-color: var(--terracotta); background: var(--bg-card); }
+  @media (max-width: 760px) { .recipe-nav-item.active { border-left-color: transparent; border-bottom-color: var(--terracotta); } }
+  .recipe-nav-item .nav-dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; display: block; }
+  .recipe-nav-item .nav-dish { font-family: var(--serif); font-size: 14px; line-height: 1.2; }
+  .recipe { display: none; }
+  .recipe.active { display: block; animation: fade 0.25s ease; }
+  .recipe-head { border-bottom: 1px solid var(--rule); padding-bottom: 16px; margin-bottom: 20px; }
+  .recipe-head .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--terracotta); margin-bottom: 8px; }
+  .recipe-head h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4vw, 38px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -0.01em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .recipe-head .source { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+  .recipe-stats { display: flex; gap: 24px; margin-top: 14px; flex-wrap: wrap; }
+  .stat { font-size: 12px; color: var(--ink-soft); }
+  .stat strong { color: var(--ink); font-weight: 500; display: block; font-size: 14px; font-family: var(--serif); }
+  .recipe-body { display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-body { grid-template-columns: 1fr; } }
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--terracotta); margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .ingredients ul { list-style: none; padding: 0; margin: 0; }
+  .ingredients li { padding: 6px 0; border-bottom: 1px dotted var(--rule); font-size: 14px; line-height: 1.4; }
+  .ingredients li:last-child { border-bottom: none; }
+  .ingredients .amount { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--terracotta-deep); margin-right: 8px; font-weight: 500; }
+  .ingredients .pantry-note { font-size: 11px; color: var(--olive); font-style: italic; margin-left: 4px; }
+  .steps { counter-reset: step; }
+  .step { counter-increment: step; padding: 12px 0 12px 36px; position: relative; font-size: 14.5px; line-height: 1.55; border-bottom: 1px solid var(--rule); }
+  .step:last-child { border-bottom: none; }
+  .step::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--terracotta); font-weight: 500; letter-spacing: 0.05em; }
+  .kid-note, .ahead-note, .preg-note { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; margin-top: 20px; font-size: 13.5px; }
+  .kid-note { border-left: 3px solid var(--gold); }
+  .ahead-note { border-left: 3px solid var(--olive); }
+  .preg-note { border-left: 3px solid var(--plum); }
+  .kid-note strong, .ahead-note strong, .preg-note strong { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; display: block; margin-bottom: 6px; }
+  .kid-note strong { color: var(--gold); }
+  .ahead-note strong { color: var(--olive-deep); }
+  .preg-note strong { color: var(--plum-deep); }
+  .grocery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grocery-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .grocery-section h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; justify-content: space-between; }
+  .grocery-section h3 .count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--terracotta); letter-spacing: 0.1em; }
+  .grocery-section ul { list-style: none; padding: 0; margin: 0; }
+  .grocery-section li { padding: 8px 0; font-size: 13.5px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; cursor: pointer; user-select: none; }
+  .grocery-section li.checked { color: var(--ink-soft); text-decoration: line-through; text-decoration-thickness: 1px; opacity: 0.55; }
+  .grocery-section .check-box { width: 14px; height: 14px; border: 1.5px solid var(--ink-soft); border-radius: 3px; flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .grocery-section li.checked .check-box { background: var(--terracotta); border-color: var(--terracotta); }
+  .grocery-section li.checked .check-box::after { content: '\2713'; color: white; font-size: 11px; line-height: 1; }
+  .item-amt { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); display: block; margin-top: 1px; }
+  .tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.06em; vertical-align: 1px; text-transform: uppercase; }
+  .tag.have { background: var(--ghost); color: var(--ink-soft); }
+  .tag.d1 { background: var(--olive); color: white; }
+  .grocery-note { background: var(--bg-card); border: 1px solid var(--rule); border-left: 3px solid var(--terracotta); border-radius: 0 4px 4px 0; padding: 16px 18px; margin-bottom: 24px; font-size: 13.5px; }
+  .grocery-note strong { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta-deep); margin-bottom: 6px; }
+  .prep-timeline { position: relative; padding-left: 28px; }
+  .prep-timeline::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px; width: 1px; background: var(--rule); }
+  .prep-event { position: relative; margin-bottom: 28px; }
+  .prep-event::before { content: ''; position: absolute; left: -25px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--terracotta); }
+  .prep-event.start::before { background: var(--terracotta); }
+  .prep-event.delivery::before { background: var(--blue); border-color: var(--blue); border-radius: 2px; }
+  .prep-event h3 { font-family: var(--serif); font-weight: 400; font-size: 22px; margin: 0 0 4px; line-height: 1.2; }
+  .prep-event.delivery h3 { color: var(--blue-deep); }
+  .prep-event .when { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 12px; }
+  .prep-event.delivery .when { color: var(--blue); }
+  .prep-event .duration { color: var(--ink-soft); margin-left: 6px; text-transform: none; letter-spacing: 0; }
+  .prep-event ul { list-style: none; padding: 0; margin: 0; }
+  .prep-event li { padding: 6px 0 6px 18px; font-size: 14px; position: relative; line-height: 1.5; }
+  .prep-event li::before { content: '\2192'; position: absolute; left: 0; color: var(--terracotta); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .prep-event.delivery li::before { color: var(--blue); }
+  .prep-event li.for { color: var(--ink-soft); font-size: 12px; padding-top: 0; padding-bottom: 4px; font-style: italic; }
+  .prep-event li.for::before { display: none; }
+  .pantry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .pantry-grid { grid-template-columns: 1fr; } }
+  .pantry-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .pantry-section h3 { font-family: var(--serif); font-size: 19px; margin: 0 0 12px; font-weight: 400; }
+  .pantry-section ul { padding-left: 18px; font-size: 13.5px; line-height: 1.7; }
+  @media print {
+    body { background: white; }
+    .meal-planner { padding: 20px; max-width: none; }
+    .tabs { display: none; }
+    .panel { display: block !important; page-break-before: always; }
+    .panel:first-of-type { page-break-before: avoid; }
+    .recipe { display: block !important; page-break-before: always; }
+    .recipe-nav { display: none; }
+    .recipe-layout { grid-template-columns: 1fr; }
+    .day-pill { box-shadow: none; }
+  }
+</style>
+
+<div class="meal-planner">
+  <header class="mast">
+    <h1 class="mast-title">Three <em>Nights</em></h1>
+    <div class="mast-meta">
+      <strong>Tue 7/7, Wed 7/8 &amp; Fri 7/10</strong>
+      Family of four &middot; NW DC
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview"><span class="tab-num">01</span>Overview</button>
+    <button class="tab" data-tab="recipes"><span class="tab-num">02</span>Recipes</button>
+    <button class="tab" data-tab="grocery"><span class="tab-num">03</span>Grocery List</button>
+    <button class="tab" data-tab="prep"><span class="tab-num">04</span>Prep Schedule</button>
+    <button class="tab" data-tab="pantry"><span class="tab-num">05</span>Pantry &amp; Notes</button>
+  </nav>
+
+  <section class="panel active" data-panel="overview">
+    <div class="overview-grid">
+      <div>
+        <p class="lede">Three pregnancy-safe dinners for Tuesday, Wednesday, and Friday &mdash; a hearty <em>egg frittata</em> loaded with spinach, your salmon roasted with broccoli, and an aromatic curried chicken and rice to close.</p>
+
+        <div class="week-strip">
+          <div class="day-pill" onclick="goToRecipe(0)">
+            <div class="dow">Tue 7/7</div>
+            <div class="dish">Loaded Baked Frittata (spinach, pepper, goat cheese)</div>
+            <div class="meta">45 min &middot; skillet to oven</div>
+            <div class="badges"><span class="badge iron">Iron</span><span class="badge folate">Folate</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(1)">
+            <div class="dow">Wed 7/8</div>
+            <div class="dish">Sheet-Pan Salmon &amp; Broccoli, Sesame-Ginger</div>
+            <div class="meta">20 min &middot; sheet pan</div>
+            <div class="badges"><span class="badge folate">Omega-3</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(2)">
+            <div class="dow">Fri 7/10</div>
+            <div class="dish">Curried Chicken &amp; Rice with Cranberries</div>
+            <div class="meta">45 min &middot; one skillet + saucepan</div>
+            <div class="badges"><span class="badge iron">Iron</span></div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <h4>Your requests, mapped</h4>
+          <p><strong>Eggs:</strong> Tuesday's frittata uses 8 large eggs as the centerpiece &mdash; fully baked until set (no runny yolk), which is the pregnancy-safe way to eat eggs. <strong>24 oz salmon</strong> (four 6-oz fillets): Wednesday's sheet-pan salmon, roasted through with its own broccoli side. Friday's curried chicken rounds out the three nights with a different protein and cuisine.</p>
+        </div>
+
+        <div class="callout preg">
+          <h4>Pregnancy-safe</h4>
+          <p>All three follow the usual standard. The frittata bakes until the eggs are fully set (the recipe's test: the eggs shouldn't jiggle when you shake the pan) &mdash; no runny yolks. The salmon is roasted to 145&deg;F fully through (a change from the recipe's "slightly rare center"). The chicken cooks to 165&deg;F. The bacon in the frittata is fully cooked in. No alcohol; cheeses are cooked. Spinach and chicken bring iron; spinach and eggs bring folate; salmon brings DHA.</p>
+        </div>
+
+        <div class="callout warn">
+          <h4>Two small pregnancy notes</h4>
+          <p><strong>Goat cheese</strong> (Tue): fresh goat cheese is fine in pregnancy as long as it's pasteurized &mdash; most US supermarket chevre is, but check the label. It's also baked here, which adds a margin of safety. <strong>Eggs</strong> (Tue): the whole point of a frittata is fully-set eggs, so this is naturally safe &mdash; just bake until there's no jiggle.</p>
+        </div>
+
+        <div class="callout">
+          <h4>About this week's books</h4>
+          <p>Tuesday's frittata and Wednesday's salmon are from <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) &mdash; by Genevieve Ko and Lidey Heuck. Friday's Curried Chicken and Rice is from <em>Milk Street: Tuesday Nights</em> (Kimball, 2018). All directly extracted; no generated recipes this week.</p>
+        </div>
+      </div>
+
+      <aside>
+        <div class="sidebar-card">
+          <h3>Got perishables to use up?</h3>
+          <p>Tell me what's about to spoil and I'll rework next week around it.</p>
+          <div class="perishable-input">
+            <textarea id="perishables" placeholder="e.g., half a bunch of cilantro, 1 zucchini, 6 oz mushrooms&hellip;"></textarea>
+            <button onclick="logPerishables()">Note it for next week</button>
+            <div class="perishable-output" id="perish-out"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-card" style="margin-top:20px">
+          <h3>Nutrition this week (for the pregnancy)</h3>
+          <ul>
+            <li><strong>Iron:</strong> spinach + eggs (Tue), dark-meat chicken (Fri).</li>
+            <li><strong>Folate:</strong> spinach and eggs (Tue), cilantro (Fri) &mdash; folate stays important throughout.</li>
+            <li><strong>Omega-3 (DHA):</strong> salmon (Wed).</li>
+            <li><strong>Protein &amp; choline:</strong> eggs are one of the best sources of choline, which supports fetal brain development.</li>
+          </ul>
+          <p style="margin-top:10px;font-size:12px;font-style:italic">Not medical advice &mdash; follow your OB/midwife, especially on fish frequency.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="recipes">
+    <div class="recipe-layout">
+      <nav class="recipe-nav" id="recipe-nav">
+        <button class="recipe-nav-item active" data-recipe="0"><span class="nav-dow">Tue 7/7</span><span class="nav-dish">Loaded Frittata</span></button>
+        <button class="recipe-nav-item" data-recipe="1"><span class="nav-dow">Wed 7/8</span><span class="nav-dish">Sheet-Pan Salmon</span></button>
+        <button class="recipe-nav-item" data-recipe="2"><span class="nav-dow">Fri 7/10</span><span class="nav-dish">Curried Chicken &amp; Rice</span></button>
+      </nav>
+
+      <div class="recipe-content">
+
+        <article class="recipe active" data-recipe="0">
+          <div class="recipe-head">
+            <div class="eyebrow">Tuesday &middot; the egg night</div>
+            <h2>Loaded Baked Frittata</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Genevieve Ko.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>45 min</strong>total</div>
+              <div class="stat"><strong>20 min</strong>active</div>
+              <div class="stat"><strong>Oven 375&deg;F</strong>oven-safe skillet</div>
+              <div class="stat"><strong>4&ndash;6 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">8 large</span>eggs <span class="pantry-note">(your eggs)</span></li>
+                  <li><span class="amount">&frac12; cup</span>whole milk</li>
+                  <li><span class="amount">&frac12; cup</span>finely diced uncooked bacon</li>
+                  <li><span class="amount">1 cup</span>diced onion (1 small onion)</li>
+                  <li><span class="amount">2 cups</span>diced red or orange bell pepper (2 peppers)</li>
+                  <li><span class="amount">1 (5-oz) pkg</span>baby spinach</li>
+                  <li><span class="amount">4 oz</span>fresh goat cheese <span class="pantry-note">(pasteurized &mdash; check label)</span></li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>green salad or crusty bread <span class="pantry-note">(optional)</span></li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Heat the oven to 375&deg;F. In a medium bowl, beat the eggs, milk, 1 tsp salt, and &frac12; tsp pepper until smooth. Set aside.</div>
+                <div class="step">In a 10&ndash;12" cast-iron or oven-safe nonstick skillet, cook the bacon over medium heat, stirring, until browned, 4&ndash;5 min.</div>
+                <div class="step">Add the onion, peppers, and &frac12; tsp each salt and pepper. Cook, stirring often, until the onions are translucent, 6&ndash;7 min. Add the spinach a handful at a time, stirring after each addition, until wilted.</div>
+                <div class="step">Reduce the heat to low and pour in the egg mixture. Stir well to distribute the vegetables, then smooth the top. Drop small nuggets of goat cheese evenly over the top. Transfer to the oven.</div>
+                <div class="step">Bake until the top is golden brown and the eggs are fully set, 20&ndash;25 min. <strong>Pregnancy:</strong> when you shake the pan, the eggs shouldn't jiggle at all &mdash; that's your signal the eggs are fully cooked and safe. Cool on a rack about 10 min.</div>
+                <div class="step">Cut into wedges and serve warm or at room temperature, with a salad or bread if you like.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                A frittata is one of the safest ways to eat eggs in pregnancy &mdash; the eggs cook fully through, no runny yolk. Bake until there's no jiggle. Eggs are rich in choline (key for fetal brain development) and the spinach adds iron and folate. Goat cheese: use pasteurized (standard for US chevre; check the label), and here it's baked, which is extra-safe. Bacon is fully cooked into the dish.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead / leftovers</strong>
+                Dice the onion and peppers the night before. The frittata keeps up to 3 days in the fridge and is good cold or at room temperature &mdash; great for lunch the next day, or slice it into a sandwich (trim to fit your bread).
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Frittata is excellent finger food for both kids &mdash; soft, protein-rich, easy to hold. Cut into small strips or cubes for the 13-mo. The flavors are mild (no spice). If your kids are iffy on visible spinach, the egg holds it together so it's less noticeable. Goat cheese adds a mild tang most toddlers accept; if not, the frittata works fine without it in a kid portion.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="1">
+          <div class="recipe-head">
+            <div class="eyebrow">Wednesday &middot; the salmon night</div>
+            <h2>Sheet-Pan Salmon &amp; Broccoli<br>with Sesame &amp; Ginger</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Lidey Heuck.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>20 min</strong>total</div>
+              <div class="stat"><strong>15 min</strong>active</div>
+              <div class="stat"><strong>Oven 425&deg;F</strong>one sheet pan</div>
+              <div class="stat"><strong>4 servings</strong>uses your 24 oz salmon</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">4 Tbsp</span>toasted sesame oil, divided <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2 Tbsp</span>soy sauce or tamari <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>rice vinegar <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>honey</li>
+                  <li><span class="amount">2 Tbsp</span>grated fresh ginger (2" piece)</li>
+                  <li><span class="amount">1 clove</span>garlic, grated</li>
+                  <li><span class="amount">1 lb</span>broccoli, cut into florets</li>
+                  <li><span class="amount">2</span>scallions, cut into 1&frac12;" segments, plus thinly sliced for garnish</li>
+                  <li><span class="amount">1 Tbsp</span>olive oil, plus more for brushing <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">4 (6 oz)</span>skin-on salmon fillets <span class="pantry-note">(your 24 oz salmon)</span></li>
+                  <li><span class="amount">&frac12;</span>lime, for serving</li>
+                  <li><span class="amount">&mdash;</span>sesame seeds, for serving</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>steamed rice <span class="pantry-note">(pantry)</span></li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Heat the oven to 425&deg;F. In a small bowl, whisk 3 Tbsp of the sesame oil with the soy sauce, rice vinegar, honey, ginger, and garlic until smooth. Set the glaze aside.</div>
+                <div class="step">Place the broccoli florets and 1&frac12;" scallion segments on a sheet pan. Drizzle with the olive oil and the remaining 1 Tbsp sesame oil, sprinkle with &frac12; tsp salt and &frac14; tsp pepper, and toss well. Roast 5 min.</div>
+                <div class="step">While the broccoli roasts, pat the salmon dry, brush all over with olive oil, and season with salt and pepper.</div>
+                <div class="step">Toss the broccoli and push it to the edges of the pan, clearing space in the center. Place the salmon fillets evenly spaced in the center. Brush the fillets generously with the glaze.</div>
+                <div class="step">Return the pan to the oven and roast until the salmon is <strong>fully cooked through &mdash; opaque and flaking easily, 145&deg;F at the thickest part</strong>, about 12&ndash;14 min. <em>(This is a bit longer than the recipe's "slightly rare center" &mdash; for pregnancy, cook it all the way through.)</em></div>
+                <div class="step">Squeeze the lime over the broccoli and sprinkle with salt. Scatter sliced scallions and sesame seeds over the salmon. Serve hot with rice.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Salmon is a top pregnancy fish &mdash; low-mercury, high in DHA omega-3s. The single change: roast to 145&deg;F (fully opaque) rather than the medium-rare center the recipe targets. A couple of extra minutes does it. Everything else is pregnancy-safe as written.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Tue evening, ~5 min)</strong>
+                Whisk the sesame-ginger glaze and refrigerate. Cut the broccoli florets and scallions. Wednesday is then a 20-min roast &mdash; the fastest night of the three.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Salmon and broccoli are both great for kids. The glaze has soy sauce (salty) and honey &mdash; note honey is fine for both kids here since they're both over 12 months (never under 1). For the 13-mo, flake the salmon and check carefully for pin bones; chop the broccoli small. Brush their salmon with less glaze, or none, if you want to keep the sodium down.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="2">
+          <div class="recipe-head">
+            <div class="eyebrow">Friday &middot; South Asian-inspired</div>
+            <h2>Curried Chicken &amp; Rice<br>with Cranberries</h2>
+            <div class="source">From <em>Milk Street: Tuesday Nights</em> by Christopher Kimball (2018).</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>45 min</strong>total</div>
+              <div class="stat"><strong>30 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>skillet + saucepan</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">3 Tbsp</span>grapeseed or other neutral oil, divided</li>
+                  <li><span class="amount">2 Tbsp</span>finely grated fresh ginger</li>
+                  <li><span class="amount">1 Tbsp</span>curry powder</li>
+                  <li><span class="amount">&frac12; tsp</span>ground cardamom</li>
+                  <li><span class="amount">1&frac12; lb</span>boneless, skinless chicken thighs, cut into 1" pieces</li>
+                  <li><span class="amount">1&frac12; cups</span>basmati rice, rinsed &amp; drained</li>
+                  <li><span class="amount">2&frac12; cups</span>coconut water, divided</li>
+                  <li><span class="amount">4 large</span>shallots, halved &amp; thinly sliced</li>
+                  <li><span class="amount">&frac12; cup</span>chopped dried cranberries</li>
+                  <li><span class="amount">2 Tbsp</span>lime juice</li>
+                  <li><span class="amount">2&frac12; cups</span>fresh cilantro, roughly chopped</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>mango chutney <span class="pantry-note">(optional)</span></li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">In a medium bowl, mix 1 Tbsp of the oil, the ginger, curry powder, cardamom, 2&frac12; tsp salt, and 1 tsp pepper into a paste. Transfer 1 Tbsp of the paste to a large saucepan and set aside. Add the chicken to the bowl with the rest of the paste; stir to coat. Let marinate at room temperature while you cook the rice.</div>
+                <div class="step">Stir the rinsed rice and 1&frac34; cups of the coconut water into the paste in the saucepan. Bring to a simmer over medium-high. Cover, reduce to low, and cook until mostly tender but still slightly firm, about 10 min. Off heat, uncover and fluff with a fork. Set aside.</div>
+                <div class="step">In a 12" skillet over medium-high, heat the remaining 2 Tbsp oil until shimmering. Add the shallots and cook, stirring, until golden brown, about 5 min. Push them to the side; add the chicken in an even layer.</div>
+                <div class="step">Cook the chicken without stirring until golden on the bottom, about 3 min. Stir the shallots into the chicken, add &frac14; cup coconut water, and scrape up the browned bits. Cook, stirring, until the liquid evaporates, about 20 seconds. <strong>Pregnancy:</strong> make sure the chicken is cooked through to 165&deg;F, no pink.</div>
+                <div class="step">Add the rice, the remaining &frac12; cup coconut water, and the cranberries. Stir, then cook undisturbed over medium-high until the rice begins to crisp on the bottom, about 3 min.</div>
+                <div class="step">Off heat, add the lime juice. Stir to combine, scraping up the crust. Stir in 2 cups of the cilantro; taste and season. Transfer to a platter and top with the remaining &frac12; cup cilantro. Serve with mango chutney if you like.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Chicken thighs cooked fully to 165&deg;F &mdash; a good iron source from the dark meat. Curry powder and cardamom are spices, not concerns. No alcohol. A warming, aromatic one-dish meal that reheats well if the pregnant adult wants leftovers for lunch.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Thu evening, ~10 min)</strong>
+                Slice the shallots; grate the ginger; mix the curry paste. Cut the chicken and marinate it overnight in the fridge (it only benefits). Rinse the rice. Friday is then a smooth 30-min cook.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Mild curry, usually a hit. For the 13-mo: chop the chicken small; the rice is soft and easy. Chop the dried cranberries small (whole dried fruit is a choking risk under 4) &mdash; or pull a portion before adding them. The dish isn't spicy-hot, but taste first; a spoon of plain yogurt cools it if needed. For the 34-mo, the sweet cranberries usually win them over.
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="grocery">
+    <div class="grocery-note">
+      <strong>Single delivery this week</strong>
+      Three nights, one order. The salmon is used Wednesday &mdash; if you buy it frozen, thaw it Tuesday night; if fresh, it holds fine from a Sunday/Monday delivery. Nothing else is especially fragile.
+    </div>
+
+    <div class="grocery-grid">
+      <div class="grocery-section">
+        <h3>You already have <span class="count">your ingredients</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Eggs <span class="tag have">have</span><span class="item-amt">need 8 large &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Salmon, 24 oz (4 fillets) <span class="tag have">have</span><span class="item-amt">for Wednesday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Proteins to buy <span class="count">2 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Boneless skinless chicken thighs <span class="tag d1">D1</span><span class="item-amt">1&frac12; lb &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Bacon <span class="tag d1">D1</span><span class="item-amt">small pkg (&frac12; cup diced) &middot; for Tuesday frittata</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Produce <span class="count">9 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Baby spinach <span class="tag d1">D1</span><span class="item-amt">1 (5-oz) pkg &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Red or orange bell peppers <span class="tag d1">D1</span><span class="item-amt">2 &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Onion <span class="tag d1">D1</span><span class="item-amt">1 small &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Broccoli <span class="tag d1">D1</span><span class="item-amt">1 lb (florets) &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Scallions <span class="tag d1">D1</span><span class="item-amt">1 bunch &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh ginger <span class="tag d1">D1</span><span class="item-amt">1 large knob (Wed + Fri) &middot; 4 Tbsp total</span></span></li>
+          <li><span class="check-box"></span><span>Shallots <span class="tag d1">D1</span><span class="item-amt">4 large &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh cilantro <span class="tag d1">D1</span><span class="item-amt">2 large bunches (2&frac12; cups) &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Garlic <span class="tag d1">D1</span><span class="item-amt">1 head &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Lime <span class="tag d1">D1</span><span class="item-amt">2 (Wed + Fri)</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Dairy <span class="count">2 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Fresh goat cheese <span class="tag d1">D1</span><span class="item-amt">4 oz &middot; for Tuesday &middot; pasteurized (check label)</span></span></li>
+          <li><span class="check-box"></span><span>Whole milk <span class="tag d1">D1</span><span class="item-amt">small carton (&frac12; cup) &middot; for Tuesday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Canned &amp; Dry <span class="count">5 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Basmati rice <span class="tag d1">D1</span><span class="item-amt">1&frac12; cups &middot; for Friday (or use pantry rice)</span></span></li>
+          <li><span class="check-box"></span><span>Coconut water <span class="tag d1">D1</span><span class="item-amt">2&frac12; cups &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Dried cranberries <span class="tag d1">D1</span><span class="item-amt">small bag (&frac12; cup) &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Honey <span class="tag d1">D1</span><span class="item-amt">small (1 Tbsp) &middot; for Wednesday &middot; likely have</span></span></li>
+          <li><span class="check-box"></span><span>Mango chutney <span class="tag d1">D1</span><span class="item-amt">optional &middot; for Friday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Spices &amp; Pantry &mdash; check <span class="count">mostly carryover</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Curry powder <span class="tag d1">D1</span><span class="item-amt">1 Tbsp &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Ground cardamom <span class="tag d1">D1</span><span class="item-amt">&frac12; tsp &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Toasted sesame oil, soy sauce, rice vinegar, neutral oil, sesame seeds <span class="tag have">have</span><span class="item-amt">from prior weeks</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>You likely have <span class="count">pantry</span></h3>
+        <ul style="color:var(--ink-soft);font-style:italic">
+          <li><span style="opacity:.4">&middot;</span> Olive oil</li>
+          <li><span style="opacity:.4">&middot;</span> Kosher salt &amp; black pepper</li>
+          <li><span style="opacity:.4">&middot;</span> Rice (Wed serving; Fri if not buying basmati)</li>
+          <li><span style="opacity:.4">&middot;</span> Crusty bread or salad (optional, Tue)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="prep">
+    <p class="lede">No Sunday cook needed. Each night is a fast same-evening cook, and the two 45-minute nights (Tue frittata, Fri chicken) are mostly hands-off or benefit from a little prior-evening prep.</p>
+
+    <div class="prep-timeline">
+      <div class="prep-event delivery">
+        <div class="when">Delivery <span class="duration">&middot; one order</span></div>
+        <h3>Groceries arrive</h3>
+        <ul>
+          <li class="for">Everything for the three nights</li>
+          <li><strong>On arrival:</strong> refrigerate everything. If the salmon came frozen, leave it frozen and move it to the fridge Tuesday night to thaw for Wednesday.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event start">
+        <div class="when">Tue evening <span class="duration">&middot; 20 min active (45 total)</span></div>
+        <h3>Loaded baked frittata</h3>
+        <ul>
+          <li class="for">Day-of for Tuesday</li>
+          <li>Beat the eggs + milk. Crisp the bacon, soften onion + peppers, wilt the spinach, pour in eggs, top with goat cheese, bake 20&ndash;25 min until fully set (no jiggle). Rest 10 min, cut into wedges.</li>
+          <li><strong>While it bakes (5 min for Wed):</strong> whisk the sesame-ginger salmon glaze; cut the broccoli florets and scallions. Refrigerate.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Wed evening <span class="duration">&middot; 15 min active (20 total)</span></div>
+        <h3>Sheet-pan salmon &amp; broccoli</h3>
+        <ul>
+          <li class="for">Day-of for Wednesday</li>
+          <li>Start rice. Roast broccoli 5 min, add glazed salmon to the pan, roast ~12&ndash;14 min to 145&deg;F. Finish with lime, scallions, sesame seeds.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Thu evening <span class="duration">&middot; 10 min</span></div>
+        <h3>Friday prep</h3>
+        <ul>
+          <li class="for">Sets up Friday's chicken</li>
+          <li>Mix the curry paste; cut and marinate the chicken overnight in the fridge (improves it). Slice the shallots; grate the ginger; rinse the rice. Store covered.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Fri evening <span class="duration">&middot; 30 min active</span></div>
+        <h3>Curried chicken &amp; rice</h3>
+        <ul>
+          <li class="for">Day-of for Friday</li>
+          <li>Cook the rice in the curry paste + coconut water. Brown shallots and chicken (to 165&deg;F), combine with rice and cranberries, crisp the bottom, finish with lime and cilantro.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event" style="opacity:.7">
+        <div class="when">Fri night <span class="duration">&middot; when you're ready</span></div>
+        <h3>The reward</h3>
+        <ul>
+          <li class="for">Three nights, done</li>
+          <li>Eggs Tuesday, salmon Wednesday, curry Friday &mdash; all pregnancy-safe, with leftovers that carry to lunch.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="pantry">
+    <div class="pantry-grid">
+      <div class="pantry-section">
+        <h3>Pregnancy food-safety, the working rules</h3>
+        <ul>
+          <li><strong>Eggs:</strong> fully cooked, no runny yolk &mdash; the frittata bakes until set (no jiggle).</li>
+          <li><strong>Fish:</strong> salmon to 145&deg;F (opaque, flakes easily); low-mercury.</li>
+          <li><strong>Poultry:</strong> chicken to 165&deg;F, no pink.</li>
+          <li><strong>Cheese:</strong> goat cheese fine if pasteurized (check label), and it's baked here.</li>
+          <li><strong>Bacon:</strong> fully cooked into the frittata.</li>
+          <li><strong>No alcohol</strong> in any of these dishes.</li>
+        </ul>
+        <p style="color:var(--ink-soft);font-size:12px;font-style:italic;margin-top:10px">General guidance, not medical advice &mdash; defer to your OB/midwife, especially on fish frequency.</p>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Iron, folate &amp; more this week</h3>
+        <ul>
+          <li><strong>Iron:</strong> spinach + eggs (Tue), dark-meat chicken (Fri).</li>
+          <li><strong>Folate:</strong> spinach and eggs (Tue), cilantro (Fri).</li>
+          <li><strong>Choline:</strong> eggs (Tue) &mdash; one of the best sources, important for fetal brain development.</li>
+          <li><strong>Omega-3 (DHA):</strong> salmon (Wed).</li>
+          <li><strong>Absorption tip:</strong> the peppers (Tue) and lime (Wed, Fri) add vitamin C to help iron uptake.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Working with the kids</h3>
+        <ul>
+          <li><strong>Tue (frittata):</strong> ideal finger food; cut small for the 13-mo. Mild, no spice.</li>
+          <li><strong>Wed (salmon &amp; broccoli):</strong> flake salmon, check pin bones; less glaze for the 13-mo (salty).</li>
+          <li><strong>Fri (curried chicken):</strong> mild curry; chop chicken and cranberries small for the 13-mo.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Substitutions, if Fresh is missing something</h3>
+        <ul>
+          <li><strong>Goat cheese (Tue):</strong> feta (pasteurized) or a soft, mild cheese; or leave it out.</li>
+          <li><strong>Coconut water (Fri):</strong> chicken stock or water works; you lose a little sweetness.</li>
+          <li><strong>Dried cranberries (Fri):</strong> raisins or chopped dried apricots.</li>
+          <li><strong>Basmati (Fri):</strong> any long-grain white rice.</li>
+          <li><strong>Broccoli (Wed):</strong> broccolini, green beans, or asparagus roast similarly.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section" style="grid-column: 1 / -1;">
+        <h3>For next week</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px">Tell me:</p>
+        <ul>
+          <li>Any perishables to use up (likely: extra spinach, cilantro, half a pepper, ginger)</li>
+          <li>How the pregnant adult's appetite is &mdash; aversions, nausea, or cravings, so I can plan blander/smaller/specific if that helps</li>
+          <li>Kid wins / refusals</li>
+          <li>How many nights you need, and any ingredients to use up</li>
+          <li>Specific Amazon Fresh deals you saw</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  });
+  document.querySelectorAll('.recipe-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.recipe;
+      document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n === item));
+      document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === target));
+    });
+  });
+  function goToRecipe(idx) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'recipes'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === 'recipes'));
+    document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n.dataset.recipe === String(idx)));
+    document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === String(idx)));
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+  document.querySelectorAll('.grocery-section li').forEach(li => {
+    if (li.querySelector('.check-box')) {
+      li.addEventListener('click', () => li.classList.toggle('checked'));
+    }
+  });
+  function logPerishables() {
+    const txt = document.getElementById('perishables').value.trim();
+    const out = document.getElementById('perish-out');
+    if (!txt) { out.textContent = ''; return; }
+    out.innerHTML = '<strong>Noted:</strong> ' + txt.replace(/\n/g, '<br>') + '<br><br><em>Bring this to next week\'s planning conversation and I\'ll work these into the recipes.</em>';
+  }
+</script>
