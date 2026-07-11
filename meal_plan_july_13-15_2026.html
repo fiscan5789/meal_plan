@@ -1,0 +1,651 @@
+<!-- Meal Plan: Mon-Wed, July 13-15, 2026 -->
+<meta charset="UTF-8">
+<style>
+  :root {
+    --bg: #f7f1e6; --bg-card: #fffaf2; --ink: #2a2521; --ink-soft: #5a4e44;
+    --rule: #d9cdb8; --terracotta: #b85432; --terracotta-deep: #8e3e22;
+    --olive: #5a6b3a; --olive-deep: #3f4a28; --gold: #c89942;
+    --blue: #3a6280; --blue-deep: #234561; --plum: #7a4a6b; --plum-deep: #5a3450;
+    --ghost: #ebe1cb;
+    --shadow: 0 1px 0 rgba(42,37,33,0.04), 0 8px 24px -12px rgba(42,37,33,0.18);
+    --serif: "Fraunces", "Cormorant Garamond", Georgia, serif;
+    --sans: "Sohne", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; }
+  body, .meal-planner { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .meal-planner { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+  .mast { border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .mast-title { font-family: var(--serif); font-weight: 400; margin: 0; font-size: clamp(36px, 5vw, 58px); line-height: 0.95; letter-spacing: -0.02em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .mast-title em { font-style: italic; color: var(--terracotta); font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1; }
+  .mast-meta { text-align: right; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); line-height: 1.6; }
+  .mast-meta strong { color: var(--ink); display: block; font-weight: 500; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid var(--rule); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { background: transparent; border: none; padding: 14px 18px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-soft); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s ease; white-space: nowrap; letter-spacing: 0.02em; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--terracotta-deep); border-bottom-color: var(--terracotta); }
+  .tab-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ghost); margin-right: 6px; vertical-align: 1px; }
+  .tab.active .tab-num { color: var(--terracotta); }
+  .panel { display: none; animation: fade 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .overview-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+  @media (max-width: 760px) { .overview-grid { grid-template-columns: 1fr; } }
+  .lede { font-family: var(--serif); font-size: 22px; line-height: 1.35; color: var(--ink); font-weight: 300; margin: 0 0 20px; font-variation-settings: "opsz" 60; }
+  .lede em { color: var(--terracotta); font-style: italic; }
+  .week-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+  @media (max-width: 640px) { .week-strip { grid-template-columns: 1fr; } }
+  .day-pill { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 12px; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .day-pill:hover { border-color: var(--terracotta); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .day-pill .dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 8px; }
+  .day-pill .dish { font-family: var(--serif); font-size: 15px; line-height: 1.25; font-weight: 400; }
+  .day-pill .meta { font-size: 11px; color: var(--ink-soft); margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+  .day-pill .badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .badge.iron { background: var(--terracotta); color: white; }
+  .badge.folate { background: var(--olive); color: white; }
+  .callout { background: var(--bg-card); border-left: 3px solid var(--olive); padding: 16px 18px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+  .callout h4 { margin: 0 0 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--olive-deep); font-weight: 500; }
+  .callout p { margin: 0; font-size: 14px; }
+  .callout.warn { border-left-color: var(--gold); }
+  .callout.warn h4 { color: var(--gold); }
+  .callout.preg { border-left-color: var(--plum); }
+  .callout.preg h4 { color: var(--plum-deep); }
+  .sidebar-card { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; }
+  .sidebar-card h3 { font-family: var(--serif); font-weight: 400; font-size: 20px; margin: 0 0 12px; }
+  .sidebar-card p { font-size: 13px; color: var(--ink-soft); }
+  .sidebar-card ul { padding-left: 18px; font-size: 13px; }
+  .sidebar-card li { margin-bottom: 6px; }
+  .perishable-input { background: var(--bg); border: 1px dashed var(--rule); border-radius: 6px; padding: 14px; margin-top: 12px; }
+  .perishable-input textarea { width: 100%; border: 1px solid var(--rule); border-radius: 4px; padding: 8px; font-family: var(--sans); font-size: 13px; resize: vertical; min-height: 60px; background: white; }
+  .perishable-input button { background: var(--olive); color: white; border: none; padding: 8px 14px; border-radius: 4px; font-family: var(--sans); font-size: 12px; font-weight: 500; margin-top: 8px; cursor: pointer; letter-spacing: 0.03em; }
+  .perishable-input button:hover { background: var(--olive-deep); }
+  .perishable-output { margin-top: 10px; font-size: 13px; color: var(--olive-deep); line-height: 1.5; }
+  .recipe-layout { display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-layout { grid-template-columns: 1fr; } }
+  .recipe-nav { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--rule); padding-right: 16px; }
+  @media (max-width: 760px) { .recipe-nav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 0 12px; } }
+  .recipe-nav-item { background: transparent; border: none; text-align: left; padding: 12px 10px; cursor: pointer; border-radius: 4px; transition: all 0.15s; color: var(--ink-soft); border-left: 2px solid transparent; min-width: 0; }
+  @media (max-width: 760px) { .recipe-nav-item { border-left: none; border-bottom: 2px solid transparent; min-width: 140px; } }
+  .recipe-nav-item:hover { background: var(--bg-card); color: var(--ink); }
+  .recipe-nav-item.active { color: var(--terracotta-deep); border-left-color: var(--terracotta); background: var(--bg-card); }
+  @media (max-width: 760px) { .recipe-nav-item.active { border-left-color: transparent; border-bottom-color: var(--terracotta); } }
+  .recipe-nav-item .nav-dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; display: block; }
+  .recipe-nav-item .nav-dish { font-family: var(--serif); font-size: 14px; line-height: 1.2; }
+  .recipe { display: none; }
+  .recipe.active { display: block; animation: fade 0.25s ease; }
+  .recipe-head { border-bottom: 1px solid var(--rule); padding-bottom: 16px; margin-bottom: 20px; }
+  .recipe-head .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--terracotta); margin-bottom: 8px; }
+  .recipe-head h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4vw, 38px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -0.01em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .recipe-head .source { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+  .recipe-stats { display: flex; gap: 24px; margin-top: 14px; flex-wrap: wrap; }
+  .stat { font-size: 12px; color: var(--ink-soft); }
+  .stat strong { color: var(--ink); font-weight: 500; display: block; font-size: 14px; font-family: var(--serif); }
+  .recipe-body { display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-body { grid-template-columns: 1fr; } }
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--terracotta); margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .ingredients ul { list-style: none; padding: 0; margin: 0; }
+  .ingredients li { padding: 6px 0; border-bottom: 1px dotted var(--rule); font-size: 14px; line-height: 1.4; }
+  .ingredients li:last-child { border-bottom: none; }
+  .ingredients .amount { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--terracotta-deep); margin-right: 8px; font-weight: 500; }
+  .ingredients .pantry-note { font-size: 11px; color: var(--olive); font-style: italic; margin-left: 4px; }
+  .steps { counter-reset: step; }
+  .step { counter-increment: step; padding: 12px 0 12px 36px; position: relative; font-size: 14.5px; line-height: 1.55; border-bottom: 1px solid var(--rule); }
+  .step:last-child { border-bottom: none; }
+  .step::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--terracotta); font-weight: 500; letter-spacing: 0.05em; }
+  .kid-note, .ahead-note, .preg-note { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; margin-top: 20px; font-size: 13.5px; }
+  .kid-note { border-left: 3px solid var(--gold); }
+  .ahead-note { border-left: 3px solid var(--olive); }
+  .preg-note { border-left: 3px solid var(--plum); }
+  .kid-note strong, .ahead-note strong, .preg-note strong { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; display: block; margin-bottom: 6px; }
+  .kid-note strong { color: var(--gold); }
+  .ahead-note strong { color: var(--olive-deep); }
+  .preg-note strong { color: var(--plum-deep); }
+  .grocery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grocery-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .grocery-section h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; justify-content: space-between; }
+  .grocery-section h3 .count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--terracotta); letter-spacing: 0.1em; }
+  .grocery-section ul { list-style: none; padding: 0; margin: 0; }
+  .grocery-section li { padding: 8px 0; font-size: 13.5px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; cursor: pointer; user-select: none; }
+  .grocery-section li.checked { color: var(--ink-soft); text-decoration: line-through; text-decoration-thickness: 1px; opacity: 0.55; }
+  .grocery-section .check-box { width: 14px; height: 14px; border: 1.5px solid var(--ink-soft); border-radius: 3px; flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .grocery-section li.checked .check-box { background: var(--terracotta); border-color: var(--terracotta); }
+  .grocery-section li.checked .check-box::after { content: '\2713'; color: white; font-size: 11px; line-height: 1; }
+  .item-amt { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); display: block; margin-top: 1px; }
+  .tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.06em; vertical-align: 1px; text-transform: uppercase; }
+  .tag.have { background: var(--ghost); color: var(--ink-soft); }
+  .tag.d1 { background: var(--olive); color: white; }
+  .grocery-note { background: var(--bg-card); border: 1px solid var(--rule); border-left: 3px solid var(--terracotta); border-radius: 0 4px 4px 0; padding: 16px 18px; margin-bottom: 24px; font-size: 13.5px; }
+  .grocery-note strong { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta-deep); margin-bottom: 6px; }
+  .prep-timeline { position: relative; padding-left: 28px; }
+  .prep-timeline::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px; width: 1px; background: var(--rule); }
+  .prep-event { position: relative; margin-bottom: 28px; }
+  .prep-event::before { content: ''; position: absolute; left: -25px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--terracotta); }
+  .prep-event.start::before { background: var(--terracotta); }
+  .prep-event.delivery::before { background: var(--blue); border-color: var(--blue); border-radius: 2px; }
+  .prep-event h3 { font-family: var(--serif); font-weight: 400; font-size: 22px; margin: 0 0 4px; line-height: 1.2; }
+  .prep-event.delivery h3 { color: var(--blue-deep); }
+  .prep-event .when { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 12px; }
+  .prep-event.delivery .when { color: var(--blue); }
+  .prep-event .duration { color: var(--ink-soft); margin-left: 6px; text-transform: none; letter-spacing: 0; }
+  .prep-event ul { list-style: none; padding: 0; margin: 0; }
+  .prep-event li { padding: 6px 0 6px 18px; font-size: 14px; position: relative; line-height: 1.5; }
+  .prep-event li::before { content: '\2192'; position: absolute; left: 0; color: var(--terracotta); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .prep-event.delivery li::before { color: var(--blue); }
+  .prep-event li.for { color: var(--ink-soft); font-size: 12px; padding-top: 0; padding-bottom: 4px; font-style: italic; }
+  .prep-event li.for::before { display: none; }
+  .pantry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .pantry-grid { grid-template-columns: 1fr; } }
+  .pantry-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .pantry-section h3 { font-family: var(--serif); font-size: 19px; margin: 0 0 12px; font-weight: 400; }
+  .pantry-section ul { padding-left: 18px; font-size: 13.5px; line-height: 1.7; }
+  @media print {
+    body { background: white; }
+    .meal-planner { padding: 20px; max-width: none; }
+    .tabs { display: none; }
+    .panel { display: block !important; page-break-before: always; }
+    .panel:first-of-type { page-break-before: avoid; }
+    .recipe { display: block !important; page-break-before: always; }
+    .recipe-nav { display: none; }
+    .recipe-layout { grid-template-columns: 1fr; }
+    .day-pill { box-shadow: none; }
+  }
+</style>
+
+<div class="meal-planner">
+  <header class="mast">
+    <h1 class="mast-title">Three <em>Nights</em></h1>
+    <div class="mast-meta">
+      <strong>Mon 7/13 &mdash; Wed 7/15, 2026</strong>
+      Family of four &middot; NW DC
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview"><span class="tab-num">01</span>Overview</button>
+    <button class="tab" data-tab="recipes"><span class="tab-num">02</span>Recipes</button>
+    <button class="tab" data-tab="grocery"><span class="tab-num">03</span>Grocery List</button>
+    <button class="tab" data-tab="prep"><span class="tab-num">04</span>Prep Schedule</button>
+    <button class="tab" data-tab="pantry"><span class="tab-num">05</span>Pantry &amp; Notes</button>
+  </nav>
+
+  <section class="panel active" data-panel="overview">
+    <div class="overview-grid">
+      <div>
+        <p class="lede">Three pregnancy-safe dinners for Monday through Wednesday &mdash; a one-pan <em>shrimp scampi with orzo</em>, then a gooey skillet "pizza chicken," and a bright coconut fish and tomato bake to finish.</p>
+
+        <div class="week-strip">
+          <div class="day-pill" onclick="goToRecipe(0)">
+            <div class="dow">Mon 7/13</div>
+            <div class="dish">Shrimp Scampi with Orzo</div>
+            <div class="meta">25 min &middot; one pan</div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(1)">
+            <div class="dow">Tue 7/14</div>
+            <div class="dish">Skillet "Pizza" Chicken with Tomatoes &amp; Mozzarella</div>
+            <div class="meta">45 min (30 hands-off) &middot; skillet to oven</div>
+            <div class="badges"><span class="badge iron">Iron</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(2)">
+            <div class="dow">Wed 7/15</div>
+            <div class="dish">Coconut Fish &amp; Tomato Bake</div>
+            <div class="meta">20 min active + marinate &middot; sheet pan</div>
+            <div class="badges"><span class="badge folate">Omega-3</span></div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <h4>Fresh picks for Monday &amp; Wednesday</h4>
+          <p>Since you already had the pork meatballs and pasta e ceci, these two are new: a garlicky one-pan <strong>shrimp scampi with orzo</strong> (Monday) and a bright, saucy <strong>coconut fish and tomato bake</strong> (Wednesday). Both are low-mercury seafood, quick, and distinct from Tuesday's chicken &mdash; three different proteins across the three nights.</p>
+        </div>
+
+        <div class="callout preg">
+          <h4>Pregnancy-safe</h4>
+          <p>All three follow the usual standard. Monday's shrimp cook through fully (pink and opaque), with the recipe's white wine swapped for stock &mdash; no alcohol. Tuesday's chicken roasts until no longer pink (165&deg;F), with pancetta cooked crisp and fresh mozzarella melted (both safe). Wednesday's fish is low-mercury and cooked through to 145&deg;F. All cheeses cooked. The seafood brings omega-3s; the tomato-forward dishes add vitamin C.</p>
+        </div>
+
+        <div class="callout warn">
+          <h4>Pregnancy notes</h4>
+          <p><strong>Shrimp &amp; fish:</strong> both cooked fully through &mdash; shrimp until pink and opaque, fish to 145&deg;F. Cod, snapper, haddock, and salmon are all low-mercury; avoid high-mercury fish (swordfish, king mackerel, marlin, bigeye tuna). <strong>Wine (Mon):</strong> swapped for stock, so no alcohol. <strong>Mozzarella (Tue):</strong> pasteurized and melted, so fine.</p>
+        </div>
+
+        <div class="callout">
+          <h4>About this week's books</h4>
+          <p>All three are from <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) &mdash; Ali Slagle's shrimp scampi, Melissa Clark's skillet chicken, and Yewande Komolafe's coconut fish bake. All directly extracted; no generated recipes. Monday's wine-to-stock swap is the only change, for pregnancy safety.</p>
+        </div>
+      </div>
+
+      <aside>
+        <div class="sidebar-card">
+          <h3>Got perishables to use up?</h3>
+          <p>Tell me what's about to spoil and I'll rework next week around it.</p>
+          <div class="perishable-input">
+            <textarea id="perishables" placeholder="e.g., half a bunch of cilantro, 1 zucchini, 6 oz mushrooms&hellip;"></textarea>
+            <button onclick="logPerishables()">Note it for next week</button>
+            <div class="perishable-output" id="perish-out"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-card" style="margin-top:20px">
+          <h3>Nutrition this week (for the pregnancy)</h3>
+          <ul>
+            <li><strong>Omega-3 (DHA):</strong> shrimp (Mon) and fish (Wed) &mdash; low-mercury seafood supports fetal brain development.</li>
+            <li><strong>Iron:</strong> dark-meat chicken (Tue); shrimp adds a little.</li>
+            <li><strong>Vitamin C:</strong> the lemon (Mon), tomatoes (Tue, Wed), and lime (Wed) aid iron absorption.</li>
+            <li><strong>Calcium &amp; protein:</strong> the mozzarella (Tue) and all three protein sources.</li>
+          </ul>
+          <p style="margin-top:10px;font-size:12px;font-style:italic">Not medical advice &mdash; follow your OB/midwife.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="recipes">
+    <div class="recipe-layout">
+      <nav class="recipe-nav" id="recipe-nav">
+        <button class="recipe-nav-item active" data-recipe="0"><span class="nav-dow">Mon 7/13</span><span class="nav-dish">Shrimp Scampi &amp; Orzo</span></button>
+        <button class="recipe-nav-item" data-recipe="1"><span class="nav-dow">Tue 7/14</span><span class="nav-dish">Skillet Pizza Chicken</span></button>
+        <button class="recipe-nav-item" data-recipe="2"><span class="nav-dow">Wed 7/15</span><span class="nav-dish">Coconut Fish Bake</span></button>
+      </nav>
+
+      <div class="recipe-content">
+
+        <article class="recipe active" data-recipe="0">
+          <div class="recipe-head">
+            <div class="eyebrow">Monday &middot; Italian-American</div>
+            <h2>Shrimp Scampi with Orzo</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Ali Slagle. White wine swapped for stock for pregnancy safety.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>25 min</strong>total</div>
+              <div class="stat"><strong>20 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>one skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">1 lb</span>large shrimp, peeled &amp; deveined</li>
+                  <li><span class="amount">3 Tbsp</span>extra-virgin olive oil, divided <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>grated lemon zest</li>
+                  <li><span class="amount">&frac12; tsp</span>red pepper flakes <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">4 cloves</span>garlic, minced (divided)</li>
+                  <li><span class="amount">2 Tbsp</span>unsalted butter</li>
+                  <li><span class="amount">1 cup</span>orzo</li>
+                  <li><span class="amount">&frac13; cup</span>chicken or seafood stock <span class="pantry-note">(swapped for the wine)</span></li>
+                  <li><span class="amount">2 cups</span>boiling water or stock</li>
+                  <li><span class="amount">3 Tbsp</span>finely chopped fresh parsley</li>
+                  <li><span class="amount">1 Tbsp</span>fresh lemon juice</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">opt. side</span>steamed broccoli, arugula, or a green salad</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">In a medium bowl, stir together the shrimp, 1 Tbsp of the oil, the lemon zest, red pepper flakes, &frac12; tsp salt, &frac14; tsp black pepper, and half the garlic. Set aside to marinate. (Can be done up to 1 hour ahead, refrigerated.)</div>
+                <div class="step">In a medium skillet, combine the butter, the remaining 2 Tbsp oil, and the remaining garlic over medium heat. When the butter bubbles, add the orzo and &frac12; tsp salt. Cook, stirring often, until the orzo is toasted, about 2 min, adjusting heat so the garlic doesn't burn.</div>
+                <div class="step">Carefully add the &frac13; cup stock (it will bubble) and stir until absorbed, about 1 min. <em>(This replaces the wine &mdash; you lose nothing important; the garlicky butter carries the dish.)</em></div>
+                <div class="step">Stir in the 2 cups boiling water or stock, reduce the heat to low, cover, and cook until the orzo is al dente, about 12 min.</div>
+                <div class="step">Add the shrimp in a snug, even layer on top of the orzo. Cover and cook until all the shrimp are pink and opaque throughout, 2&ndash;4 min. <strong>Pregnancy:</strong> make sure every shrimp is fully cooked &mdash; pink and firm, no translucent gray. Remove from heat and let sit, covered, 2 min.</div>
+                <div class="step">Sprinkle with parsley and lemon juice, season with salt and pepper, and serve immediately.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Shrimp is low-mercury and safe in pregnancy when fully cooked &mdash; cook until pink and opaque throughout. The white wine is swapped for stock, so there's no alcohol. Shrimp brings some omega-3s and protein; the lemon adds vitamin C. A light, quick one-pan night.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (once groceries arrive, ~10 min)</strong>
+                Mince all the garlic; zest and juice the lemon; chop the parsley. Marinate the shrimp up to 1 hour ahead in the fridge. If your shrimp is frozen, thaw it in a bowl of cold water (~15 min) before marinating. The dish then comes together in about 20 minutes.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Shrimp and orzo are both good for kids. This has &frac12; tsp red pepper flakes &mdash; scoop a portion of orzo for the 13-mo <em>before</em> or use a light hand (it's mild but present). Chop the shrimp small for the 13-mo (a whole shrimp is a choking risk); if either kid hasn't had shellfish, introduce a small amount and watch for a couple of hours. The buttery orzo is usually an easy win.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="1">
+          <div class="recipe-head">
+            <div class="eyebrow">Tuesday &middot; Italian-American</div>
+            <h2>Skillet "Pizza" Chicken with<br>Tomatoes &amp; Mozzarella</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Melissa Clark. Scaled to ~2 lb chicken for the family.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>45 min</strong>total</div>
+              <div class="stat"><strong>15 min</strong>active</div>
+              <div class="stat"><strong>Oven 400&deg;F</strong>ovenproof skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">2 lb</span>bone-in, skin-on chicken thighs and/or drumsticks</li>
+                  <li><span class="amount">1&frac14; tsp</span>kosher salt <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">&frac12; tsp</span>black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>extra-virgin olive oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">3 oz</span>pancetta, diced</li>
+                  <li><span class="amount">3 cloves</span>garlic, thinly sliced</li>
+                  <li><span class="amount">2</span>anchovy fillets</li>
+                  <li><span class="amount">&frac14; tsp</span>red pepper flakes <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 (28-oz) can</span>whole plum tomatoes</li>
+                  <li><span class="amount">1</span>large basil sprig, plus chopped basil to serve</li>
+                  <li><span class="amount">6 oz</span>bocconcini (halved) or fresh mozzarella, in &frac34;" pieces <span class="pantry-note">(pasteurized)</span></li>
+                  <li><span class="amount">to serve</span>crusty bread or rice, or a salad</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Heat the oven to 400&deg;F. Pat the chicken dry and season both sides with the salt and pepper.</div>
+                <div class="step">Heat the oil in a large ovenproof skillet over medium-high. Add the pancetta and cook, stirring, until browned. Transfer with a slotted spoon to a paper-towel-lined plate.</div>
+                <div class="step">Add the chicken to the skillet and sear, turning occasionally, until well browned on all sides, about 10 min. Transfer to a plate. Pour off all but 1 Tbsp fat.</div>
+                <div class="step">Add the garlic, anchovies, and red pepper flakes; fry, stirring, 1 min. Stir in the tomatoes and basil sprig, breaking up the tomatoes, and cook until slightly thickened, about 10 min.</div>
+                <div class="step">Return the chicken to the skillet. Transfer to the oven and cook, uncovered, until the chicken is no longer pink, about 30 min. <strong>Pregnancy:</strong> chicken should reach 165&deg;F.</div>
+                <div class="step">Scatter the mozzarella over the top. Switch the oven to broil and broil until the cheese is melted and bubbling, 2&ndash;3 min (watch closely). Top with the crisp pancetta and chopped basil. Serve.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Chicken cooked fully to 165&deg;F (the 30-min oven step handles it). Fresh mozzarella/bocconcini is safe when made from pasteurized milk &mdash; check the label &mdash; and it's melted under the broiler here anyway. Pancetta and anchovies are fully cooked. No wine in this sauce. A good iron source from the dark meat.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Monday evening, ~5 min)</strong>
+                Slice the garlic; dice the pancetta; halve the bocconcini and refrigerate. The dish is mostly hands-off once it's in the oven, so there's little else to prep &mdash; the 30-min roast is a good window to handle bath/bedtime.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                "Pizza chicken" is a reliable kid hit &mdash; tomato and melty cheese. For the 13-mo: shred a piece of chicken off the bone (check for small bones and remove skin), spoon on a little sauce and cheese. The sauce has anchovy and a little heat but reads as mild tomato; taste first. For the 34-mo, serve with bread to dip in the sauce.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="2">
+          <div class="recipe-head">
+            <div class="eyebrow">Wednesday &middot; coastal / global</div>
+            <h2>Coconut Fish &amp; Tomato Bake</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Yewande Komolafe.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>20 min active</strong>+ 15&ndash;30 min marinate</div>
+              <div class="stat"><strong>Oven 425&deg;F + broiler</strong>sheet pan</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+              <div class="stat"><strong>Low-mercury</strong>cod, snapper, or salmon</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">&frac34; cup</span>unsweetened coconut milk</li>
+                  <li><span class="amount">1 Tbsp</span>honey</li>
+                  <li><span class="amount">1 (1") piece</span>fresh ginger, scrubbed &amp; grated</li>
+                  <li><span class="amount">1 clove</span>garlic, grated</li>
+                  <li><span class="amount">&frac12; tsp</span>ground turmeric</li>
+                  <li><span class="amount">&frac12; tsp</span>red pepper flakes <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2</span>limes</li>
+                  <li><span class="amount">&frac12; cup</span>chopped fresh cilantro (divided)</li>
+                  <li><span class="amount">4 (6 oz)</span>fish fillets &mdash; snapper, cod, haddock, striped bass, or salmon <span class="pantry-note">(low-mercury)</span></li>
+                  <li><span class="amount">2 pints</span>cherry or grape tomatoes (~4 cups)</li>
+                  <li><span class="amount">3 Tbsp</span>olive oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">&mdash;</span>kosher salt <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>steamed rice or toasted baguette <span class="pantry-note">(pantry)</span></li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">In a large bowl, whisk the coconut milk, honey, ginger, garlic, turmeric, red pepper flakes, and 1 tsp salt. Zest and juice 1 lime directly into the mixture. Stir in &frac14; cup of the cilantro.</div>
+                <div class="step">Add the fish fillets and turn to coat. Cover and marinate in the fridge 15&ndash;30 min. (Good window to prep rice and set the table.)</div>
+                <div class="step">Position one oven rack in the lower-middle and one as close to the broiler as possible. Heat the oven to 425&deg;F.</div>
+                <div class="step">Place the tomatoes on a large sheet pan, drizzle with 2 Tbsp of the oil, season with salt, and toss. Nestle the marinated fish among the tomatoes and spoon all the marinade over the fish. Drizzle the remaining 1 Tbsp oil over the top.</div>
+                <div class="step">Roast on the lower-middle rack until the surface of the fish is opaque but the center isn't quite done, 8&ndash;10 min (depends on thickness). Then heat the broiler.</div>
+                <div class="step">Broil on the top rack, rotating the pan halfway, until the fish is <strong>cooked through and flakes easily (145&deg;F)</strong> and the tomatoes brown in spots, 5&ndash;6 min. <strong>Pregnancy:</strong> cook the fish fully through &mdash; opaque and flaking, not translucent in the center.</div>
+                <div class="step">Divide the tomatoes and fish among plates; tip the pan juices over the fish. Garnish with the remaining &frac14; cup cilantro and serve with lime wedges, over rice or with bread.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Choose a low-mercury fish &mdash; cod, snapper, haddock, striped bass, and salmon all qualify and all work here. Cook fully to 145&deg;F (the broiler step handles it). Coconut milk, turmeric, ginger are all fine. No alcohol. The tomatoes and lime add vitamin C; a light, saucy, comforting night.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Tuesday evening, ~5 min)</strong>
+                Whisk the coconut marinade (through the cilantro) and refrigerate. Grate the ginger and garlic. You can even add the fish to marinate the morning of &mdash; up to a few hours is fine. Wednesday is then just assembling the sheet pan and roasting.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                One NYT commenter's picky 3-year-old sopped up the sauce &mdash; the coconut-tomato sauce is mild and a little sweet. This has &frac12; tsp red pepper flakes in the marinade; it stays gentle, but pull a piece of fish before broiling if you want zero heat for the 13-mo. Flake the fish carefully for pin bones (especially with salmon or snapper). Serve over soft rice to catch the sauce. Honey is fine here for both kids since they're over 1.
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="grocery">
+    <div class="grocery-note">
+      <strong>Single delivery this week</strong>
+      Three nights, one order. The shrimp (Mon) and fish (Wed) are the fragile items &mdash; if bought frozen, thaw the shrimp Monday and the fish Wednesday morning. If fresh, order for delivery close to Monday and they'll hold.
+    </div>
+
+    <div class="grocery-grid">
+      <div class="grocery-section">
+        <h3>Proteins to buy <span class="count">4 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Large shrimp, peeled &amp; deveined <span class="tag d1">D1</span><span class="item-amt">1 lb &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Bone-in, skin-on chicken thighs/drumsticks <span class="tag d1">D1</span><span class="item-amt">2 lb &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Pancetta <span class="tag d1">D1</span><span class="item-amt">3 oz, diced &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Low-mercury fish fillets (cod, snapper, haddock, or salmon) <span class="tag d1">D1</span><span class="item-amt">4 (6 oz each) &middot; for Wednesday &middot; frozen is fine</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Produce <span class="count">8 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Garlic <span class="tag d1">D1</span><span class="item-amt">2 heads &middot; all three nights</span></span></li>
+          <li><span class="check-box"></span><span>Lemons <span class="tag d1">D1</span><span class="item-amt">2 (zest + juice) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh parsley <span class="tag d1">D1</span><span class="item-amt">1 bunch (3 Tbsp) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh basil <span class="tag d1">D1</span><span class="item-amt">1 bunch &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh ginger <span class="tag d1">D1</span><span class="item-amt">1 small knob (1" piece) &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh cilantro <span class="tag d1">D1</span><span class="item-amt">1 bunch (&frac12; cup) &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Limes <span class="tag d1">D1</span><span class="item-amt">2 &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Cherry or grape tomatoes <span class="tag d1">D1</span><span class="item-amt">2 pints &middot; for Wednesday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Dairy <span class="count">2 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Unsalted butter <span class="tag d1">D1</span><span class="item-amt">2 Tbsp &middot; for Monday &middot; likely have</span></span></li>
+          <li><span class="check-box"></span><span>Fresh mozzarella or bocconcini <span class="tag d1">D1</span><span class="item-amt">6 oz &middot; for Tuesday &middot; pasteurized (check label)</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Canned &amp; Dry <span class="count">5 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Orzo <span class="tag d1">D1</span><span class="item-amt">1 box (1 cup used Mon) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Canned whole plum tomatoes <span class="tag d1">D1</span><span class="item-amt">1 (28-oz) can &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Anchovy fillets <span class="tag d1">D1</span><span class="item-amt">small tin/jar (2 used Tue) &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Unsweetened coconut milk <span class="tag d1">D1</span><span class="item-amt">1 can (&frac34; cup used Wed) &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Honey <span class="tag d1">D1</span><span class="item-amt">1 Tbsp &middot; for Wednesday &middot; likely have</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Pantry &mdash; check what you have <span class="count">mostly carryover</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Ground turmeric <span class="tag d1">D1</span><span class="item-amt">&frac12; tsp &middot; for Wednesday</span></span></li>
+          <li><span class="check-box"></span><span>Chicken or seafood stock <span class="tag d1">D1</span><span class="item-amt">~2&frac13; cups &middot; for Monday orzo</span></span></li>
+          <li><span class="check-box"></span><span>Red pepper flakes <span class="tag have">have</span><span class="item-amt">Mon + Wed</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>You likely have <span class="count">pantry</span></h3>
+        <ul style="color:var(--ink-soft);font-style:italic">
+          <li><span style="opacity:.4">&middot;</span> Olive oil, butter</li>
+          <li><span style="opacity:.4">&middot;</span> Kosher salt &amp; black pepper</li>
+          <li><span style="opacity:.4">&middot;</span> Rice (Wed serving)</li>
+          <li><span style="opacity:.4">&middot;</span> Crusty bread (optional, Tue &amp; Wed)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="prep">
+    <p class="lede">No Sunday cook needed. Each night is a fast same-evening cook, and Tuesday's chicken is mostly hands-off once it's in the oven &mdash; a good window for bath and bedtime.</p>
+
+    <div class="prep-timeline">
+      <div class="prep-event delivery">
+        <div class="when">Delivery <span class="duration">&middot; one order</span></div>
+        <h3>Groceries arrive</h3>
+        <ul>
+          <li class="for">Everything for the three nights</li>
+          <li><strong>On arrival:</strong> refrigerate everything. If the shrimp or fish came frozen, keep them frozen &mdash; thaw the shrimp Monday morning and the fish Wednesday morning (fridge, or cold water for ~15 min).</li>
+        </ul>
+      </div>
+
+      <div class="prep-event start">
+        <div class="when">Mon evening <span class="duration">&middot; 20 min active (25 total)</span></div>
+        <h3>Shrimp scampi with orzo</h3>
+        <ul>
+          <li class="for">Day-of for Monday</li>
+          <li>Marinate the shrimp (lemon zest, garlic, red pepper). Toast the orzo in garlic butter, add stock, simmer covered ~12 min, lay the shrimp on top and steam 2&ndash;4 min until pink. Finish with parsley and lemon.</li>
+          <li><strong>While the orzo simmers (5 min for Tue):</strong> slice the garlic, dice the pancetta, halve the mozzarella. Refrigerate.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Tue evening <span class="duration">&middot; 15 min active (45 total)</span></div>
+        <h3>Skillet pizza chicken</h3>
+        <ul>
+          <li class="for">Day-of for Tuesday</li>
+          <li>Crisp the pancetta, sear the chicken, build the tomato sauce, then roast 30 min (to 165&deg;F). Top with mozzarella, broil 2&ndash;3 min. The 30-min roast is hands-off &mdash; good for bath/bedtime.</li>
+          <li><strong>Before bed (5 min for Wed):</strong> whisk the coconut marinade (coconut milk, honey, ginger, garlic, turmeric, lime, cilantro). Refrigerate.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Wed evening <span class="duration">&middot; 20 min active (+ marinate)</span></div>
+        <h3>Coconut fish &amp; tomato bake</h3>
+        <ul>
+          <li class="for">Day-of for Wednesday</li>
+          <li>Marinate the fish 15&ndash;30 min. Start rice. Toss tomatoes on a sheet pan, nestle in the fish with its marinade, roast at 425&deg;F 8&ndash;10 min, then broil 5&ndash;6 min to 145&deg;F. Garnish with cilantro and lime.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event" style="opacity:.7">
+        <div class="when">Wed night <span class="duration">&middot; when you're ready</span></div>
+        <h3>The reward</h3>
+        <ul>
+          <li class="for">Three nights, done</li>
+          <li>Shrimp Monday, chicken Tuesday, coconut fish Wednesday &mdash; all pregnancy-safe, three different proteins.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="pantry">
+    <div class="pantry-grid">
+      <div class="pantry-section">
+        <h3>Pregnancy food-safety, the working rules</h3>
+        <ul>
+          <li><strong>Seafood:</strong> shrimp cooked until pink and opaque; fish to 145&deg;F. Low-mercury choices only (cod, snapper, haddock, salmon &mdash; yes; swordfish, king mackerel, marlin, bigeye tuna &mdash; no).</li>
+          <li><strong>Poultry:</strong> chicken to 165&deg;F, no pink.</li>
+          <li><strong>Cheese:</strong> fresh mozzarella fine if pasteurized (check label), and it's melted here.</li>
+          <li><strong>Cured pork &amp; anchovy:</strong> pancetta and anchovies fully cooked into the dish &mdash; safe.</li>
+          <li><strong>No alcohol</strong> &mdash; Monday's wine is swapped for stock.</li>
+        </ul>
+        <p style="color:var(--ink-soft);font-size:12px;font-style:italic;margin-top:10px">General guidance, not medical advice &mdash; defer to your OB/midwife.</p>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Nutrition this week</h3>
+        <ul>
+          <li><strong>Omega-3 (DHA):</strong> shrimp (Mon) and fish (Wed) &mdash; low-mercury seafood, good for fetal brain development.</li>
+          <li><strong>Iron:</strong> dark-meat chicken (Tue); shrimp adds a little.</li>
+          <li><strong>Absorption tip:</strong> the lemon (Mon), tomatoes (Tue, Wed), and lime (Wed) provide vitamin C to boost iron uptake.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Working with the kids</h3>
+        <ul>
+          <li><strong>Mon (shrimp scampi):</strong> chop shrimp small for the 13-mo; buttery orzo is a win; watch shellfish if new.</li>
+          <li><strong>Tue (pizza chicken):</strong> shred chicken off the bone, check for bones; tomato + cheese is a hit.</li>
+          <li><strong>Wed (coconut fish):</strong> mild sweet sauce; flake fish for pin bones; serve over soft rice.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Substitutions, if Fresh is missing something</h3>
+        <ul>
+          <li><strong>Orzo (Mon):</strong> any small pasta, or serve the scampi over rice or with crusty bread.</li>
+          <li><strong>Bone-in chicken (Tue):</strong> bone-in breasts work; adjust roast so they reach 165&deg;F. Boneless thighs also fine (shorter roast).</li>
+          <li><strong>Bocconcini (Tue):</strong> any pasteurized fresh mozzarella, torn.</li>
+          <li><strong>Fish (Wed):</strong> cod, snapper, haddock, striped bass, or salmon all work &mdash; pick what looks best and is low-mercury.</li>
+          <li><strong>Coconut milk (Wed):</strong> full-fat is richest; light works with a slightly thinner sauce.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section" style="grid-column: 1 / -1;">
+        <h3>For next week</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px">Tell me:</p>
+        <ul>
+          <li>Any perishables to use up (likely: cilantro, parsley, basil, a lime or two, ginger)</li>
+          <li>How the pregnant adult's appetite is &mdash; aversions, nausea, or cravings, so I can plan blander/smaller/specific if that helps</li>
+          <li>Kid wins / refusals</li>
+          <li>How many nights you need, and any ingredients to use up</li>
+          <li>Specific Amazon Fresh deals you saw</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  });
+  document.querySelectorAll('.recipe-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.recipe;
+      document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n === item));
+      document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === target));
+    });
+  });
+  function goToRecipe(idx) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'recipes'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === 'recipes'));
+    document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n.dataset.recipe === String(idx)));
+    document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === String(idx)));
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+  document.querySelectorAll('.grocery-section li').forEach(li => {
+    if (li.querySelector('.check-box')) {
+      li.addEventListener('click', () => li.classList.toggle('checked'));
+    }
+  });
+  function logPerishables() {
+    const txt = document.getElementById('perishables').value.trim();
+    const out = document.getElementById('perish-out');
+    if (!txt) { out.textContent = ''; return; }
+    out.innerHTML = '<strong>Noted:</strong> ' + txt.replace(/\n/g, '<br>') + '<br><br><em>Bring this to next week\'s planning conversation and I\'ll work these into the recipes.</em>';
+  }
+</script>
