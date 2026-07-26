@@ -1,0 +1,769 @@
+<!-- Meal Plan: Tue, Thu, Fri - July 21, 23, 24, 2026 -->
+<meta charset="UTF-8">
+<style>
+  :root {
+    --bg: #f7f1e6; --bg-card: #fffaf2; --ink: #2a2521; --ink-soft: #5a4e44;
+    --rule: #d9cdb8; --terracotta: #b85432; --terracotta-deep: #8e3e22;
+    --olive: #5a6b3a; --olive-deep: #3f4a28; --gold: #c89942;
+    --blue: #3a6280; --blue-deep: #234561; --plum: #7a4a6b; --plum-deep: #5a3450;
+    --ghost: #ebe1cb;
+    --shadow: 0 1px 0 rgba(42,37,33,0.04), 0 8px 24px -12px rgba(42,37,33,0.18);
+    --serif: "Fraunces", "Cormorant Garamond", Georgia, serif;
+    --sans: "Sohne", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; }
+  body, .meal-planner { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  .meal-planner { max-width: 1100px; margin: 0 auto; padding: 32px 28px 80px; }
+  .mast { border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .mast-title { font-family: var(--serif); font-weight: 400; margin: 0; font-size: clamp(36px, 5vw, 58px); line-height: 0.95; letter-spacing: -0.02em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .mast-title em { font-style: italic; color: var(--terracotta); font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1; }
+  .mast-meta { text-align: right; font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-soft); line-height: 1.6; }
+  .mast-meta strong { color: var(--ink); display: block; font-weight: 500; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 1px solid var(--rule); overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { background: transparent; border: none; padding: 14px 18px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink-soft); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s ease; white-space: nowrap; letter-spacing: 0.02em; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--terracotta-deep); border-bottom-color: var(--terracotta); }
+  .tab-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--ghost); margin-right: 6px; vertical-align: 1px; }
+  .tab.active .tab-num { color: var(--terracotta); }
+  .panel { display: none; animation: fade 0.25s ease; }
+  .panel.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .overview-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+  @media (max-width: 760px) { .overview-grid { grid-template-columns: 1fr; } }
+  .lede { font-family: var(--serif); font-size: 22px; line-height: 1.35; color: var(--ink); font-weight: 300; margin: 0 0 20px; font-variation-settings: "opsz" 60; }
+  .lede em { color: var(--terracotta); font-style: italic; }
+  .week-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 24px 0; }
+  @media (max-width: 640px) { .week-strip { grid-template-columns: 1fr; } }
+  .day-pill { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 12px; cursor: pointer; transition: all 0.15s; text-align: left; }
+  .day-pill:hover { border-color: var(--terracotta); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .day-pill .dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 8px; }
+  .day-pill .dish { font-family: var(--serif); font-size: 15px; line-height: 1.25; font-weight: 400; }
+  .day-pill .meta { font-size: 11px; color: var(--ink-soft); margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+  .day-pill .badges { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .badge.iron { background: var(--terracotta); color: white; }
+  .badge.folate { background: var(--olive); color: white; }
+  .badge.mild { background: var(--blue); color: white; }
+  .callout { background: var(--bg-card); border-left: 3px solid var(--olive); padding: 16px 18px; margin: 20px 0; border-radius: 0 4px 4px 0; }
+  .callout h4 { margin: 0 0 6px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--olive-deep); font-weight: 500; }
+  .callout p { margin: 0; font-size: 14px; }
+  .callout.warn { border-left-color: var(--gold); }
+  .callout.warn h4 { color: var(--gold); }
+  .callout.preg { border-left-color: var(--plum); }
+  .callout.preg h4 { color: var(--plum-deep); }
+  .sidebar-card { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; }
+  .sidebar-card h3 { font-family: var(--serif); font-weight: 400; font-size: 20px; margin: 0 0 12px; }
+  .sidebar-card p { font-size: 13px; color: var(--ink-soft); }
+  .sidebar-card ul { padding-left: 18px; font-size: 13px; }
+  .sidebar-card li { margin-bottom: 6px; }
+  .perishable-input { background: var(--bg); border: 1px dashed var(--rule); border-radius: 6px; padding: 14px; margin-top: 12px; }
+  .perishable-input textarea { width: 100%; border: 1px solid var(--rule); border-radius: 4px; padding: 8px; font-family: var(--sans); font-size: 13px; resize: vertical; min-height: 60px; background: white; }
+  .perishable-input button { background: var(--olive); color: white; border: none; padding: 8px 14px; border-radius: 4px; font-family: var(--sans); font-size: 12px; font-weight: 500; margin-top: 8px; cursor: pointer; letter-spacing: 0.03em; }
+  .perishable-input button:hover { background: var(--olive-deep); }
+  .perishable-output { margin-top: 10px; font-size: 13px; color: var(--olive-deep); line-height: 1.5; }
+  .recipe-layout { display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-layout { grid-template-columns: 1fr; } }
+  .recipe-nav { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--rule); padding-right: 16px; }
+  @media (max-width: 760px) { .recipe-nav { flex-direction: row; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--rule); padding: 0 0 12px; } }
+  .recipe-nav-item { background: transparent; border: none; text-align: left; padding: 12px 10px; cursor: pointer; border-radius: 4px; transition: all 0.15s; color: var(--ink-soft); border-left: 2px solid transparent; min-width: 0; }
+  @media (max-width: 760px) { .recipe-nav-item { border-left: none; border-bottom: 2px solid transparent; min-width: 140px; } }
+  .recipe-nav-item:hover { background: var(--bg-card); color: var(--ink); }
+  .recipe-nav-item.active { color: var(--terracotta-deep); border-left-color: var(--terracotta); background: var(--bg-card); }
+  @media (max-width: 760px) { .recipe-nav-item.active { border-left-color: transparent; border-bottom-color: var(--terracotta); } }
+  .recipe-nav-item .nav-dow { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; display: block; }
+  .recipe-nav-item .nav-dish { font-family: var(--serif); font-size: 14px; line-height: 1.2; }
+  .recipe { display: none; }
+  .recipe.active { display: block; animation: fade 0.25s ease; }
+  .recipe-head { border-bottom: 1px solid var(--rule); padding-bottom: 16px; margin-bottom: 20px; }
+  .recipe-head .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--terracotta); margin-bottom: 8px; }
+  .recipe-head h2 { font-family: var(--serif); font-weight: 400; font-size: clamp(28px, 4vw, 38px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -0.01em; font-variation-settings: "opsz" 144, "SOFT" 30; }
+  .recipe-head .source { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+  .recipe-stats { display: flex; gap: 24px; margin-top: 14px; flex-wrap: wrap; }
+  .stat { font-size: 12px; color: var(--ink-soft); }
+  .stat strong { color: var(--ink); font-weight: 500; display: block; font-size: 14px; font-family: var(--serif); }
+  .recipe-body { display: grid; grid-template-columns: 1fr 1.5fr; gap: 32px; }
+  @media (max-width: 760px) { .recipe-body { grid-template-columns: 1fr; } }
+  .section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--terracotta); margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .ingredients ul { list-style: none; padding: 0; margin: 0; }
+  .ingredients li { padding: 6px 0; border-bottom: 1px dotted var(--rule); font-size: 14px; line-height: 1.4; }
+  .ingredients li:last-child { border-bottom: none; }
+  .ingredients .amount { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--terracotta-deep); margin-right: 8px; font-weight: 500; }
+  .ingredients .pantry-note { font-size: 11px; color: var(--olive); font-style: italic; margin-left: 4px; }
+  .steps { counter-reset: step; }
+  .step { counter-increment: step; padding: 12px 0 12px 36px; position: relative; font-size: 14.5px; line-height: 1.55; border-bottom: 1px solid var(--rule); }
+  .step:last-child { border-bottom: none; }
+  .step::before { content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--terracotta); font-weight: 500; letter-spacing: 0.05em; }
+  .kid-note, .ahead-note, .preg-note, .side-note { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; margin-top: 20px; font-size: 13.5px; }
+  .kid-note { border-left: 3px solid var(--gold); }
+  .ahead-note { border-left: 3px solid var(--olive); }
+  .preg-note { border-left: 3px solid var(--plum); }
+  .side-note { border-left: 3px solid var(--terracotta); }
+  .kid-note strong, .ahead-note strong, .preg-note strong, .side-note strong { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; display: block; margin-bottom: 6px; }
+  .kid-note strong { color: var(--gold); }
+  .ahead-note strong { color: var(--olive-deep); }
+  .preg-note strong { color: var(--plum-deep); }
+  .side-note strong { color: var(--terracotta-deep); }
+  .side-note .side-title { font-family: var(--serif); font-size: 16px; font-weight: 400; margin: 2px 0 6px; display: block; letter-spacing: 0; text-transform: none; color: var(--ink); }
+  .side-note .side-ingredients { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 8px; font-style: italic; }
+  .grocery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .grocery-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .grocery-section h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); display: flex; align-items: baseline; justify-content: space-between; }
+  .grocery-section h3 .count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--terracotta); letter-spacing: 0.1em; }
+  .grocery-section ul { list-style: none; padding: 0; margin: 0; }
+  .grocery-section li { padding: 8px 0; font-size: 13.5px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4; cursor: pointer; user-select: none; }
+  .grocery-section li.checked { color: var(--ink-soft); text-decoration: line-through; text-decoration-thickness: 1px; opacity: 0.55; }
+  .grocery-section .check-box { width: 14px; height: 14px; border: 1.5px solid var(--ink-soft); border-radius: 3px; flex-shrink: 0; margin-top: 3px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .grocery-section li.checked .check-box { background: var(--terracotta); border-color: var(--terracotta); }
+  .grocery-section li.checked .check-box::after { content: '\2713'; color: white; font-size: 11px; line-height: 1; }
+  .item-amt { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--ink-soft); display: block; margin-top: 1px; }
+  .tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.06em; vertical-align: 1px; text-transform: uppercase; }
+  .tag.have { background: var(--ghost); color: var(--ink-soft); }
+  .tag.d1 { background: var(--olive); color: white; }
+  .grocery-note { background: var(--bg-card); border: 1px solid var(--rule); border-left: 3px solid var(--terracotta); border-radius: 0 4px 4px 0; padding: 16px 18px; margin-bottom: 24px; font-size: 13.5px; }
+  .grocery-note strong { display: block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta-deep); margin-bottom: 6px; }
+  .prep-timeline { position: relative; padding-left: 28px; }
+  .prep-timeline::before { content: ''; position: absolute; left: 8px; top: 12px; bottom: 12px; width: 1px; background: var(--rule); }
+  .prep-event { position: relative; margin-bottom: 28px; }
+  .prep-event::before { content: ''; position: absolute; left: -25px; top: 6px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2px solid var(--terracotta); }
+  .prep-event.start::before { background: var(--terracotta); }
+  .prep-event.delivery::before { background: var(--blue); border-color: var(--blue); border-radius: 2px; }
+  .prep-event h3 { font-family: var(--serif); font-weight: 400; font-size: 22px; margin: 0 0 4px; line-height: 1.2; }
+  .prep-event.delivery h3 { color: var(--blue-deep); }
+  .prep-event .when { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--terracotta); margin-bottom: 12px; }
+  .prep-event.delivery .when { color: var(--blue); }
+  .prep-event .duration { color: var(--ink-soft); margin-left: 6px; text-transform: none; letter-spacing: 0; }
+  .prep-event ul { list-style: none; padding: 0; margin: 0; }
+  .prep-event li { padding: 6px 0 6px 18px; font-size: 14px; position: relative; line-height: 1.5; }
+  .prep-event li::before { content: '\2192'; position: absolute; left: 0; color: var(--terracotta); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .prep-event.delivery li::before { color: var(--blue); }
+  .prep-event li.for { color: var(--ink-soft); font-size: 12px; padding-top: 0; padding-bottom: 4px; font-style: italic; }
+  .prep-event li.for::before { display: none; }
+  .pantry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .pantry-grid { grid-template-columns: 1fr; } }
+  .pantry-section { background: var(--bg-card); border: 1px solid var(--rule); border-radius: 6px; padding: 18px 20px; }
+  .pantry-section h3 { font-family: var(--serif); font-size: 19px; margin: 0 0 12px; font-weight: 400; }
+  .pantry-section ul { padding-left: 18px; font-size: 13.5px; line-height: 1.7; }
+  @media print {
+    body { background: white; }
+    .meal-planner { padding: 20px; max-width: none; }
+    .tabs { display: none; }
+    .panel { display: block !important; page-break-before: always; }
+    .panel:first-of-type { page-break-before: avoid; }
+    .recipe { display: block !important; page-break-before: always; }
+    .recipe-nav { display: none; }
+    .recipe-layout { grid-template-columns: 1fr; }
+    .day-pill { box-shadow: none; }
+  }
+</style>
+
+<div class="meal-planner">
+  <header class="mast">
+    <h1 class="mast-title">No-Seafood <em>Week</em></h1>
+    <div class="mast-meta">
+      <strong>Mon 7/20, Tue 7/21, Thu 7/23 &amp; Fri 7/24</strong>
+      Family of four &middot; NW DC
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="overview"><span class="tab-num">01</span>Overview</button>
+    <button class="tab" data-tab="recipes"><span class="tab-num">02</span>Recipes</button>
+    <button class="tab" data-tab="grocery"><span class="tab-num">03</span>Grocery List</button>
+    <button class="tab" data-tab="prep"><span class="tab-num">04</span>Prep Schedule</button>
+    <button class="tab" data-tab="pantry"><span class="tab-num">05</span>Pantry &amp; Notes</button>
+  </nav>
+
+  <section class="panel active" data-panel="overview">
+    <div class="overview-grid">
+      <div>
+        <p class="lede">Four pregnancy-safe dinners for Monday, Tuesday, Thursday, and Friday &mdash; <em>zero seafood</em> this week, so no fish smell. Korean-style beef bowls, chipotle pork chops with a charred corn saut&eacute;, your drumsticks in a Georgian walnut sauce with a cool cucumber salad, and a cozy crispy-gnocchi night to close.</p>
+
+        <div class="week-strip" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="day-pill" onclick="goToRecipe(0)">
+            <div class="dow">Mon 7/20</div>
+            <div class="dish">Beef Short Rib Rice Bowls</div>
+            <div class="meta">20 min &middot; one skillet</div>
+            <div class="badges"><span class="badge iron">Iron</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(1)">
+            <div class="dow">Tue 7/21</div>
+            <div class="dish">Pork Chops in Chipotle Sauce</div>
+            <div class="meta">30 min &middot; + corn &amp; zucchini</div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(2)">
+            <div class="dow">Thu 7/23</div>
+            <div class="dish">Georgian Chicken with Walnut Sauce (drumsticks)</div>
+            <div class="meta">40 min &middot; + cucumber salad</div>
+            <div class="badges"><span class="badge iron">Iron</span></div>
+          </div>
+          <div class="day-pill" onclick="goToRecipe(3)">
+            <div class="dow">Fri 7/24</div>
+            <div class="dish">Crispy Gnocchi with Burst Tomatoes &amp; Mozzarella</div>
+            <div class="meta">25 min &middot; one skillet</div>
+            <div class="badges"><span class="badge mild">Mild</span><span class="badge folate">Veg</span></div>
+          </div>
+        </div>
+
+        <div class="callout preg">
+          <h4>No seafood &mdash; and easy on a queasy stomach</h4>
+          <p>Sorry the fish smell has been rough &mdash; that's a very common pregnancy aversion, and it often sharpens in the second trimester. This whole week is seafood-free. Friday's crispy gnocchi is deliberately mild and low-aroma (browned butter, tomato, cheese) in case a bland night is welcome. If a dish smells off on a given day, the gnocchi can move to whichever night sounds most tolerable &mdash; swap freely. Your 2 lb of skin-on drumsticks go into Thursday's Georgian chicken (a clean swap for the thighs the recipe calls for).</p>
+        </div>
+
+        <div class="callout">
+          <h4>Pregnancy-safe throughout</h4>
+          <p>Beef cooked fully through (a change from the recipe's rare), pork to 145&deg;F+ with no pink, chicken to 175&deg;F, mozzarella pasteurized and melted. No alcohol in any dish. Beef and chicken bring iron; walnuts add protein; the tomato-based dishes add vitamin C to help iron absorption.</p>
+        </div>
+
+        <div class="callout warn">
+          <h4>A few pregnancy tweaks</h4>
+          <p><strong>Beef (Mon):</strong> cooked fully through, no pink, rather than left rare &mdash; the thin slices still stay tender. <strong>Pork (Tue):</strong> cooked to 145&deg;F with no pink and a short rest, rather than the recipe's "barely pink" 140&deg;F. <strong>Cotija (Tue):</strong> often unpasteurized &mdash; use a pasteurized cotija or swap in queso fresco/feta labeled pasteurized (or skip it). <strong>Drumsticks (Thu):</strong> cook to 175&deg;F; being denser near the bone, they may want a few extra oven minutes vs. thighs.</p>
+        </div>
+
+        <div class="callout">
+          <h4>About this week's books</h4>
+          <p>Monday's beef bowls and Friday's gnocchi are from <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024); Tuesday's pork chops and Thursday's chicken are from <em>Milk Street: Tuesday Nights</em> (Kimball, 2018). All directly extracted; no generated recipes. Changes are the pregnancy cook-temps above and your drumsticks swapped into Thursday.</p>
+        </div>
+      </div>
+
+      <aside>
+        <div class="sidebar-card">
+          <h3>Got perishables to use up?</h3>
+          <p>Tell me what's about to spoil and I'll rework next week around it.</p>
+          <div class="perishable-input">
+            <textarea id="perishables" placeholder="e.g., half a bunch of cilantro, 1 zucchini, 6 oz mushrooms&hellip;"></textarea>
+            <button onclick="logPerishables()">Note it for next week</button>
+            <div class="perishable-output" id="perish-out"></div>
+          </div>
+        </div>
+
+        <div class="sidebar-card" style="margin-top:20px">
+          <h3>If nausea is flaring</h3>
+          <ul>
+            <li>Friday's gnocchi is the blandest, lowest-smell option &mdash; move it earlier if needed.</li>
+            <li>Cold or room-temp food smells less; leftovers eaten cool can be easier.</li>
+            <li>Ginger (in none of these, but easy to add on the side) and plain carbs like the potatoes and gnocchi tend to sit well.</li>
+            <li>Let the non-pregnant adult handle the beef-searing step if the smell is a trigger.</li>
+          </ul>
+          <p style="margin-top:8px;font-size:12px;font-style:italic">Not medical advice &mdash; follow your OB/midwife.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="recipes">
+    <div class="recipe-layout">
+      <nav class="recipe-nav" id="recipe-nav">
+        <button class="recipe-nav-item active" data-recipe="0"><span class="nav-dow">Mon 7/20</span><span class="nav-dish">Beef Short Rib Bowls</span></button>
+        <button class="recipe-nav-item" data-recipe="1"><span class="nav-dow">Tue 7/21</span><span class="nav-dish">Pork Chops Chipotle</span></button>
+        <button class="recipe-nav-item" data-recipe="2"><span class="nav-dow">Thu 7/23</span><span class="nav-dish">Georgian Chicken</span></button>
+        <button class="recipe-nav-item" data-recipe="3"><span class="nav-dow">Fri 7/24</span><span class="nav-dish">Crispy Gnocchi</span></button>
+      </nav>
+
+      <div class="recipe-content">
+
+        <article class="recipe active" data-recipe="0">
+          <div class="recipe-head">
+            <div class="eyebrow">Monday &middot; Korean-inspired</div>
+            <h2>Beef Short Rib Rice Bowls</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Sue Li. Beef cooked through for pregnancy.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>20 min</strong>total (+ 5 min marinate)</div>
+              <div class="stat"><strong>20 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>large skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">1 lb</span>boneless beef short ribs, sliced &frac14;" thick <span class="pantry-note">(or skirt/hanger steak)</span></li>
+                  <li><span class="amount">2 Tbsp</span>soy sauce <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>peeled, grated fresh ginger</li>
+                  <li><span class="amount">1 Tbsp</span>light brown sugar</li>
+                  <li><span class="amount">2 cloves</span>garlic, grated</li>
+                  <li><span class="amount">1 tsp</span>ground coriander</li>
+                  <li><span class="amount">1 tsp</span>ground cumin</li>
+                  <li><span class="amount">&frac12; tsp</span>ground turmeric</li>
+                  <li><span class="amount">&frac14; tsp</span>red pepper flakes <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1 Tbsp</span>neutral oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">&mdash;</span>kosher salt <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>steamed rice <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>lettuce leaves, sliced celery, cilantro, lime wedges</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Combine the short ribs, soy sauce, ginger, brown sugar, garlic, coriander, cumin, turmeric, red pepper flakes, and 1 tsp salt in a bowl; toss to coat. Cover and marinate in the fridge at least 5 min (up to 8 hours).</div>
+                <div class="step">Heat the oil in a large skillet over medium heat. Working in batches so the pan isn't crowded, cook the beef until browned and <strong>cooked through &mdash; no pink</strong>, about 3 min per side.</div>
+                <div class="step">Meanwhile, have the rice hot and ready, and prep the lettuce, celery, and cilantro.</div>
+                <div class="step">Divide the rice and beef among bowls. Top with lettuce, celery, and cilantro. Serve with lime wedges to squeeze over.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Cook the beef fully through (no pink) rather than leaving it rare. Sliced thin, it cooks in a few minutes and stays tender. A strong iron night, with the lime adding vitamin C to help absorption. No alcohol. If the smell of searing beef is a trigger, have the other adult run the stovetop step &mdash; the assembled bowl is barely aromatic.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (once groceries arrive, ~10 min)</strong>
+                The marinade takes 2 minutes &mdash; you can toss the beef in it in the morning (or up to 8 hours ahead) so Monday is just sear + assemble. Slice the celery and wash the lettuce ahead. Start the rice first thing.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Tender beef over soft rice is easy for both kids. There's &frac14; tsp red pepper flakes and soy in the marinade &mdash; mild, but you can rinse a piece of beef or set aside a portion. Cut the beef into small strips for the 13-mo. Lettuce cups are fun for the 34-mo to build their own bowl.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="1">
+          <div class="recipe-head">
+            <div class="eyebrow">Tuesday &middot; Mexican</div>
+            <h2>Pork Chops in Chipotle Sauce<br><span style="font-size:20px;color:var(--ink-soft)">Chuletas de Puerco Enchipotladas</span></h2>
+            <div class="source">From <em>Milk Street: Tuesday Nights</em> by Christopher Kimball (2018). Pork cooked to 145&deg;F for pregnancy.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>30 min</strong>total</div>
+              <div class="stat"><strong>25 min</strong>active</div>
+              <div class="stat"><strong>Stovetop</strong>12" skillet + blender</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">1 lb</span>plum tomatoes, cored &amp; cut into chunks</li>
+                  <li><span class="amount">1 medium</span>white onion, cut into chunks</li>
+                  <li><span class="amount">4 cloves</span>garlic, peeled</li>
+                  <li><span class="amount">4</span>chipotle chilies in adobo + sauce clinging to them, plus more adobo as needed</li>
+                  <li><span class="amount">1 tsp</span>ground cumin</li>
+                  <li><span class="amount">&frac34; tsp</span>dried oregano <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">4</span>center-cut bone-in pork chops, ~8 oz each, &frac12;" thick, patted dry</li>
+                  <li><span class="amount">1 Tbsp</span>neutral oil <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">1&frac12; oz</span>cotija cheese, crumbled <span class="pantry-note">(pasteurized; or skip)</span></li>
+                  <li><span class="amount">to serve</span>fresh cilantro; warm tortillas or roasted potatoes</li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">In a blender, puree the tomatoes, onion, garlic, chipotles, cumin, and 1 tsp salt until smooth, about 1 min.</div>
+                <div class="step">Make a couple of shallow vertical cuts in the silver skin around each chop (prevents curling), without cutting into the meat. Season the chops both sides with salt and pepper.</div>
+                <div class="step">In a 12" skillet over medium-high, heat the oil until barely smoking. Brown 2 chops on one side, about 3 min, and transfer browned-side-up to a plate. Repeat with the other 2. Let the empty skillet cool 2&ndash;3 min.</div>
+                <div class="step">Add the tomato-chipotle puree and oregano to the skillet. Cook over medium, stirring and scraping up browned bits, until slightly thickened, 10&ndash;15 min.</div>
+                <div class="step">Return the chops (browned side up) and juices, nestling them into the sauce and spooning sauce over to submerge. Cook uncovered until <strong>the pork reaches 145&deg;F with no pink</strong>, about 5&ndash;7 min, then rest 3 min. <em>(The recipe stops at 140&deg;F/barely pink; take it to 145&deg;F for pregnancy.)</em></div>
+                <div class="step">Transfer chops to a platter. Season the sauce; add more adobo for extra heat if you like. Spoon sauce over and around, then top with the cotija (pasteurized) and cilantro.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Cook the pork to 145&deg;F with a 3-minute rest and no pink (a touch past the recipe's 140&deg;F). Cotija is often made from unpasteurized milk &mdash; use a pasteurized cotija, sub queso fresco or feta labeled pasteurized, or leave it off. No alcohol. The tomatoes add vitamin C, and pork brings iron and B-vitamins.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Monday evening, ~5 min)</strong>
+                Blend the tomato-chipotle sauce and refrigerate (it keeps a couple of days). Nick the silver skin on the chops. Tuesday is then brown + simmer + finish, about 25 min. The leftover chipotles in adobo freeze well in a small bag.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Four chipotles make a moderate heat that may be too much for the kids. Easiest path: set aside a little plain browned pork before it simmers, or blend a small portion of tomato/onion/garlic <em>without</em> the chipotles for their sauce. Cut the pork small and off the bone for the 13-mo. Serve with soft tortilla strips or potato.
+              </div>
+              <div class="side-note">
+                <strong>Veggie side &middot; adapted, not from a book</strong>
+                <span class="side-title">Charred Corn &amp; Zucchini Saut&eacute;</span>
+                <p class="side-ingredients">2 cups corn (fresh or frozen) &middot; 2 zucchini, diced &middot; &frac12; red onion &middot; 1 clove garlic &middot; 1 Tbsp butter or oil &middot; juice of &frac12; lime &middot; chopped cilantro &middot; salt</p>
+                Heat 1 Tbsp butter or oil in a skillet over medium-high. Add the corn in a single layer and let it sit undisturbed 2&ndash;3 min to char, then stir. Add the zucchini and onion; cook 4&ndash;5 min until just tender and lightly browned. Add the garlic for the last 30 sec. Off heat, stir in lime juice, cilantro, and salt. Mild, quick (~12 min), and it shares the cilantro and lime already on the list. A pinch of the pork's chipotle adobo stirred in makes it smoky if you want &mdash; leave it out for the kids and the mildest version. <em>Both corn and zucchini are toddler-friendly; halve or cut the kernels for the 13-mo.</em>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="2">
+          <div class="recipe-head">
+            <div class="eyebrow">Thursday &middot; Georgian</div>
+            <h2>Georgian Chicken with<br>Walnut-Cilantro Sauce</h2>
+            <div class="source">From <em>Milk Street: Tuesday Nights</em> by Christopher Kimball (2018). Using your 2 lb skin-on drumsticks (a direct swap for the thighs the recipe calls for).</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>40&ndash;45 min</strong>total</div>
+              <div class="stat"><strong>20 min</strong>active</div>
+              <div class="stat"><strong>Stovetop + oven 450&deg;F</strong>oven-safe 12" skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">4 tsp</span>ground coriander, divided</li>
+                  <li><span class="amount">2 lb</span>skin-on chicken drumsticks <span class="pantry-note">(your drumsticks)</span></li>
+                  <li><span class="amount">3 cloves</span>garlic, peeled</li>
+                  <li><span class="amount">3 Tbsp</span>tomato paste</li>
+                  <li><span class="amount">2</span>serrano chilies, stemmed &amp; seeded <span class="pantry-note">(or 1, or omit, for milder)</span></li>
+                  <li><span class="amount">3 Tbsp</span>pomegranate molasses, divided</li>
+                  <li><span class="amount">&frac34; cup</span>fresh cilantro, divided</li>
+                  <li><span class="amount">1 cup</span>walnuts, toasted, divided</li>
+                  <li><span class="amount">1&frac14; cups</span>low-sodium chicken broth, divided</li>
+                  <li><span class="amount">1 Tbsp</span>grapeseed or other neutral oil</li>
+                  <li><span class="amount">&mdash;</span>kosher salt <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">to serve</span>warmed flatbread and/or rice <span class="pantry-note">(pantry)</span></li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Heat the oven to 450&deg;F with a rack in the middle. Stir together 2 tsp of the coriander and 1&frac12; tsp salt; season the drumsticks all over. Set aside.</div>
+                <div class="step">In a blender, combine the garlic, tomato paste, chilies, 2 Tbsp of the pomegranate molasses, the remaining 2 tsp coriander, &frac12; cup of the cilantro, &frac34; cup of the walnuts, &frac34; cup of the broth, and 1 tsp salt. Puree until smooth, 30&ndash;45 seconds.</div>
+                <div class="step">In an oven-safe 12" skillet over medium-high, heat the oil until barely smoking. Add the drumsticks and brown, turning, until the skin is crisp and golden on the main faces, 6&ndash;8 min total. <em>(Drumsticks are rounder than thighs, so turn them to brown the meatier sides.)</em> Transfer to a plate. Pour off the fat.</div>
+                <div class="step">Return the skillet to medium-low; add the remaining &frac12; cup broth, scraping up browned bits. Add the walnut puree and bring to a simmer over medium. Nestle the drumsticks back in, keeping the tops above the sauce so the skin stays crisp.</div>
+                <div class="step">Cook uncovered in the oven until a skewer in the thickest drumstick meets no resistance, about 18&ndash;22 min. <strong>Pregnancy:</strong> cook to 175&deg;F &mdash; drumsticks are denser around the bone, so they need a few more minutes than thighs would; don't rush this.</div>
+                <div class="step">Rest the drumsticks 5 min. Simmer the sauce on the stovetop with any accumulated juices until smooth and thick, about 1 min; season. Spoon the sauce onto a platter, nestle the drumsticks in, drizzle with the remaining 1 Tbsp pomegranate molasses, and sprinkle with the remaining &frac14; cup walnuts and &frac14; cup cilantro.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Cook the drumsticks fully to 175&deg;F &mdash; dark meat is best there anyway, and being denser near the bone they want a few extra oven minutes vs. thighs. All ingredients pregnancy-safe. Walnuts add protein, healthy fats, and a little iron. No alcohol. Fragrant from coriander and pomegranate but not fishy or heavy; can be made largely by the other adult if aromas are an issue.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (Wednesday evening, ~10 min)</strong>
+                Make the entire walnut-cilantro puree and refrigerate. Toast the walnuts (reserve &frac14; cup for garnish). Season the chicken. Thursday is then sear + oven + finish, about 20 min active.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                The walnut sauce is rich and mild if you go light on the chilies &mdash; use 1 or omit for a kid-friendly batch. Pull the meat off the drumstick bones (remove skin and check for cartilage/small bones) for the 13-mo. Whole walnuts are a choking hazard under 4 &mdash; the sauce blends them smooth, which is fine, but keep the garnish walnuts off the kids' plates. Serve with soft flatbread torn into strips.
+              </div>
+              <div class="side-note">
+                <strong>Veggie side &middot; adapted, not from a book</strong>
+                <span class="side-title">Cucumber, Tomato &amp; Herb Salad</span>
+                <p class="side-ingredients">2 Persian (or 1 English) cucumbers &middot; 2 tomatoes &middot; &frac14; red onion, thin &middot; handful cilantro + parsley &middot; 1 Tbsp olive oil &middot; 1 tsp red wine vinegar &middot; salt</p>
+                A cool, crunchy counter to the rich walnut sauce &mdash; and a genuinely traditional pairing with Georgian food. Chop the cucumbers and tomatoes into bite-size pieces, thinly slice the onion, and toss with torn herbs, olive oil, vinegar, and salt. Best dressed just before serving so it stays crisp. No cook, ~10 min, and it uses the cilantro already on the list. <em>Halve the tomatoes and cut cucumber into soft small pieces for the 13-mo; skip the onion on their portion.</em>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="recipe" data-recipe="3">
+          <div class="recipe-head">
+            <div class="eyebrow">Friday &middot; Italian &middot; Vegetarian</div>
+            <h2>Crispy Gnocchi with Burst<br>Tomatoes &amp; Mozzarella</h2>
+            <div class="source">From <em>Easy Weeknight Dinners</em> (NYT Cooking, 2024) by Ali Slagle.</div>
+            <div class="recipe-stats">
+              <div class="stat"><strong>25 min</strong>total</div>
+              <div class="stat"><strong>25 min</strong>active</div>
+              <div class="stat"><strong>Broiler</strong>large skillet</div>
+              <div class="stat"><strong>4 servings</strong>+ toddler portions</div>
+            </div>
+          </div>
+          <div class="recipe-body">
+            <div>
+              <div class="ingredients">
+                <h4 class="section-label">Ingredients</h4>
+                <ul>
+                  <li><span class="amount">2 Tbsp</span>extra-virgin olive oil, plus more <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2 (12&ndash;18 oz) pkgs</span>shelf-stable or refrigerated potato gnocchi</li>
+                  <li><span class="amount">4 Tbsp</span>unsalted butter</li>
+                  <li><span class="amount">4 cloves</span>garlic, thinly sliced</li>
+                  <li><span class="amount">&frac14; tsp</span>red pepper flakes, plus more <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">2 pints</span>cherry or grape tomatoes (~4 cups)</li>
+                  <li><span class="amount">&frac14; cup</span>sliced or torn fresh basil, plus more (optional)</li>
+                  <li><span class="amount">8 oz</span>fresh mozzarella, in &frac12;" pieces <span class="pantry-note">(pasteurized)</span></li>
+                  <li><span class="amount">&mdash;</span>kosher salt &amp; black pepper <span class="pantry-note">(pantry)</span></li>
+                  <li><span class="amount">opt.</span>&frac12; tsp sugar if tomatoes are tart</li>
+                </ul>
+              </div>
+            </div>
+            <div>
+              <h4 class="section-label">Method</h4>
+              <div class="steps">
+                <div class="step">Heat the broiler with a rack about 6" from the heat.</div>
+                <div class="step">Heat 1 Tbsp of the oil in a large or cast-iron skillet over medium-high. Add half the gnocchi in a single layer, breaking apart any stuck together. Cover and cook undisturbed until golden brown on the underside, 2&ndash;4 min. Transfer to a bowl. Repeat with 1 Tbsp oil and the rest of the gnocchi.</div>
+                <div class="step">Add the butter to the skillet over medium-high and cook, stirring often, until golden brown and toasty, 1&ndash;2 min. Add the garlic, red pepper flakes, 1&frac12; tsp salt, and a few grinds of pepper, lowering the heat to avoid scorching.</div>
+                <div class="step">Add the tomatoes and 3 Tbsp water. Cook, shaking the pan occasionally, until the tomatoes soften and the liquid thickens slightly, 4&ndash;6 min, smashing the tomatoes as they burst. (Add &frac12; tsp sugar if they're tart.)</div>
+                <div class="step">Return the gnocchi to the skillet and stir to coat. Nestle the mozzarella pieces in among the gnocchi. Transfer the skillet to the broiler and broil until the cheese is melted and bubbling, 2&ndash;4 min (watch closely).</div>
+                <div class="step">Top with basil and more red pepper flakes if you like. Serve.</div>
+              </div>
+              <div class="preg-note">
+                <strong>Pregnancy</strong>
+                Vegetarian, mild, and low-aroma &mdash; a gentle option if the smell of cooking meat or fish is hard right now. Fresh mozzarella is safe when pasteurized (check the label) and it's melted here anyway. No alcohol. The tomatoes add vitamin C; the gnocchi are easy, plain carbs that tend to sit well with nausea.
+              </div>
+              <div class="ahead-note">
+                <strong>Make ahead (little needed)</strong>
+                This is a 25-minute dish with almost no prep &mdash; just slice the garlic and tear the mozzarella ahead if you want. Best made fresh so the gnocchi stay crisp.
+              </div>
+              <div class="kid-note">
+                <strong>For the 13-mo &amp; 34-mo</strong>
+                Crispy gnocchi and melty cheese are a near-guaranteed kid win. There's &frac14; tsp red pepper flakes in the whole pan &mdash; mild, but you can scoop a portion before adding them for the 13-mo. Cut the gnocchi in halves or quarters for the 13-mo (they can be a choking risk whole) and make sure the cheese has cooled enough. Halve the tomatoes for both kids.
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="grocery">
+    <div class="grocery-note">
+      <strong>Single delivery this week</strong>
+      Four nights, one order. Nothing especially fragile &mdash; the beef and pork hold to Mon/Tue, and the gnocchi and tomatoes keep well. Your drumsticks are already on hand for Thursday. No seafood to time around this week.
+    </div>
+
+    <div class="grocery-grid">
+      <div class="grocery-section">
+        <h3>Proteins <span class="count">3 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Boneless beef short ribs (or skirt/hanger steak) <span class="tag d1">D1</span><span class="item-amt">1 lb, sliced &frac14;" thick &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Center-cut bone-in pork chops <span class="tag d1">D1</span><span class="item-amt">4 (~8 oz each, &frac12;" thick) &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Skin-on chicken drumsticks <span class="tag have">have</span><span class="item-amt">your 2 lb &middot; for Thursday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Produce <span class="count">14 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Plum tomatoes <span class="tag d1">D1</span><span class="item-amt">1 lb &middot; for Tuesday sauce</span></span></li>
+          <li><span class="check-box"></span><span>White onion <span class="tag d1">D1</span><span class="item-amt">1 medium &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Red onion <span class="tag d1">D1</span><span class="item-amt">1 &middot; Tue side + Thu salad</span></span></li>
+          <li><span class="check-box"></span><span>Garlic <span class="tag d1">D1</span><span class="item-amt">2 heads &middot; Mon, Tue, Thu</span></span></li>
+          <li><span class="check-box"></span><span>Fresh ginger <span class="tag d1">D1</span><span class="item-amt">1 knob (1 Tbsp) &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Celery <span class="tag d1">D1</span><span class="item-amt">a few stalks &middot; for Monday bowls</span></span></li>
+          <li><span class="check-box"></span><span>Lettuce (leaf/Little Gem) <span class="tag d1">D1</span><span class="item-amt">1 head &middot; for Monday bowls</span></span></li>
+          <li><span class="check-box"></span><span>Limes <span class="tag d1">D1</span><span class="item-amt">3 &middot; Mon bowls + Tue side</span></span></li>
+          <li><span class="check-box"></span><span>Corn <span class="tag d1">D1</span><span class="item-amt">2 cups (2&ndash;3 ears or frozen) &middot; Tue side</span></span></li>
+          <li><span class="check-box"></span><span>Zucchini <span class="tag d1">D1</span><span class="item-amt">2 &middot; Tue side</span></span></li>
+          <li><span class="check-box"></span><span>Cucumbers <span class="tag d1">D1</span><span class="item-amt">2 Persian or 1 English &middot; Thu salad</span></span></li>
+          <li><span class="check-box"></span><span>Tomatoes (salad) <span class="tag d1">D1</span><span class="item-amt">2 &middot; Thu salad</span></span></li>
+          <li><span class="check-box"></span><span>Fresh cilantro <span class="tag d1">D1</span><span class="item-amt">3 bunches &middot; Mon, Tue (+ side), Thu (+ salad)</span></span></li>
+          <li><span class="check-box"></span><span>Fresh parsley <span class="tag d1">D1</span><span class="item-amt">1 small bunch &middot; Thu salad</span></span></li>
+          <li><span class="check-box"></span><span>Serrano chilies <span class="tag d1">D1</span><span class="item-amt">2 (or fewer for milder) &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Cherry or grape tomatoes <span class="tag d1">D1</span><span class="item-amt">2 pints &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Fresh basil <span class="tag d1">D1</span><span class="item-amt">1 bunch &middot; for Friday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Dairy <span class="count">3 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Cotija cheese (pasteurized) <span class="tag d1">D1</span><span class="item-amt">1&frac12; oz &middot; for Tuesday &middot; or sub pasteurized queso fresco/feta, or skip</span></span></li>
+          <li><span class="check-box"></span><span>Unsalted butter <span class="tag d1">D1</span><span class="item-amt">4 Tbsp &middot; for Friday &middot; likely have</span></span></li>
+          <li><span class="check-box"></span><span>Fresh mozzarella <span class="tag d1">D1</span><span class="item-amt">8 oz &middot; for Friday &middot; pasteurized (check label)</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Refrigerated / Dry <span class="count">3 items</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Potato gnocchi <span class="tag d1">D1</span><span class="item-amt">2 (12&ndash;18 oz) pkgs &middot; for Friday</span></span></li>
+          <li><span class="check-box"></span><span>Walnuts <span class="tag d1">D1</span><span class="item-amt">1 cup &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Chipotle chilies in adobo <span class="tag d1">D1</span><span class="item-amt">1 small can (4 used Tue) &middot; for Tuesday</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>Pantry &mdash; check what you have <span class="count">mostly carryover</span></h3>
+        <ul>
+          <li><span class="check-box"></span><span>Pomegranate molasses <span class="tag d1">D1</span><span class="item-amt">3 Tbsp &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Ground coriander <span class="tag d1">D1</span><span class="item-amt">Mon + Thu</span></span></li>
+          <li><span class="check-box"></span><span>Ground cumin <span class="tag d1">D1</span><span class="item-amt">Mon + Tue</span></span></li>
+          <li><span class="check-box"></span><span>Ground turmeric <span class="tag d1">D1</span><span class="item-amt">&frac12; tsp &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Light brown sugar <span class="tag d1">D1</span><span class="item-amt">1 Tbsp &middot; for Monday</span></span></li>
+          <li><span class="check-box"></span><span>Dried oregano <span class="tag have">have</span><span class="item-amt">&frac34; tsp &middot; for Tuesday</span></span></li>
+          <li><span class="check-box"></span><span>Tomato paste <span class="tag d1">D1</span><span class="item-amt">3 Tbsp &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Low-sodium chicken broth <span class="tag d1">D1</span><span class="item-amt">1&frac14; cups &middot; for Thursday</span></span></li>
+          <li><span class="check-box"></span><span>Soy sauce, neutral oil, olive oil, red pepper flakes, red wine vinegar <span class="tag have">have</span><span class="item-amt">from prior weeks &middot; vinegar for Thu salad</span></span></li>
+        </ul>
+      </div>
+
+      <div class="grocery-section">
+        <h3>You likely have <span class="count">pantry</span></h3>
+        <ul style="color:var(--ink-soft);font-style:italic">
+          <li><span style="opacity:.4">&middot;</span> Olive oil, butter</li>
+          <li><span style="opacity:.4">&middot;</span> Kosher salt &amp; black pepper</li>
+          <li><span style="opacity:.4">&middot;</span> Rice (Mon &amp; Thu), tortillas or potatoes (Tue), flatbread (Thu)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="prep">
+    <p class="lede">No Sunday cook needed. Each night is a same-evening cook. Monday's beef and Tuesday's pork both take well to a little prior-evening prep, and Thursday's drumsticks want the walnut sauce made ahead. If the smell of searing meat is a trigger, hand that step to the other adult.</p>
+
+    <div class="prep-timeline">
+      <div class="prep-event delivery">
+        <div class="when">Delivery <span class="duration">&middot; one order</span></div>
+        <h3>Groceries arrive</h3>
+        <ul>
+          <li class="for">Everything for the four nights</li>
+          <li><strong>On arrival:</strong> refrigerate the beef, pork, and cheeses. Your drumsticks are already on hand for Thursday. Nothing needs freezing &mdash; each protein is used within a few days.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event start">
+        <div class="when">Mon evening <span class="duration">&middot; 20 min active (+ marinate)</span></div>
+        <h3>Beef short rib rice bowls</h3>
+        <ul>
+          <li class="for">Day-of for Monday</li>
+          <li>Marinate the sliced beef (5 min, or up to 8 hrs ahead). Start the rice. Sear the beef through in batches; slice celery, wash lettuce. Assemble bowls with cilantro and lime.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Mon evening <span class="duration">&middot; 5 min for Tue</span></div>
+        <h3>Get ahead on Tuesday</h3>
+        <ul>
+          <li class="for">Sets up Tuesday's pork</li>
+          <li>Blend the tomato-chipotle sauce and refrigerate. Nick the silver skin on the chops so they don't curl.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Tue evening <span class="duration">&middot; 25 min active (30 total)</span></div>
+        <h3>Pork chops in chipotle sauce</h3>
+        <ul>
+          <li class="for">Day-of for Tuesday</li>
+          <li>Brown the chops one side, simmer the chipotle sauce 10&ndash;15 min, nestle the chops in and cook to 145&deg;F (rest 3 min). Top with pasteurized cotija and cilantro. Warm tortillas or roast potatoes.</li>
+          <li><strong>Side:</strong> char corn in a second skillet, add zucchini + red onion, finish with lime and cilantro (~12 min, overlaps the pork's simmer).</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Wed evening <span class="duration">&middot; 10 min</span></div>
+        <h3>Thursday prep</h3>
+        <ul>
+          <li class="for">Sets up Thursday's drumsticks</li>
+          <li>Make the walnut-cilantro puree and refrigerate. Toast the walnuts (reserve &frac14; cup for garnish). Season the drumsticks and keep covered in the fridge.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Thu evening <span class="duration">&middot; 20 min active (40&ndash;45 total)</span></div>
+        <h3>Georgian chicken (your drumsticks)</h3>
+        <ul>
+          <li class="for">Day-of for Thursday</li>
+          <li>Brown the drumsticks all over, add the walnut sauce, roast 18&ndash;22 min to 175&deg;F (denser near the bone &mdash; give them the time). Rest, thicken the sauce, finish with pomegranate molasses, walnuts, cilantro. Warm flatbread.</li>
+          <li><strong>Side:</strong> while the drumsticks roast, chop the cucumber-tomato-herb salad and dress it just before serving so it stays crisp (~10 min, no cook).</li>
+        </ul>
+      </div>
+
+      <div class="prep-event">
+        <div class="when">Fri evening <span class="duration">&middot; 25 min</span></div>
+        <h3>Crispy gnocchi</h3>
+        <ul>
+          <li class="for">Day-of for Friday</li>
+          <li>Pan-fry the gnocchi in two batches until crisp. Brown the butter, add garlic + tomatoes, burst them into a sauce. Return the gnocchi, nestle in mozzarella, broil to melt. Top with basil.</li>
+        </ul>
+      </div>
+
+      <div class="prep-event" style="opacity:.7">
+        <div class="when">Fri night <span class="duration">&middot; when you're ready</span></div>
+        <h3>The reward</h3>
+        <ul>
+          <li class="for">Four nights, done &mdash; no seafood</li>
+          <li>Beef Monday, pork Tuesday, your drumsticks Thursday, a mild gnocchi Friday. Iron where it counts, and a gentle option for a queasy day.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="pantry">
+    <div class="pantry-grid">
+      <div class="pantry-section">
+        <h3>Pregnancy food-safety, the working rules</h3>
+        <ul>
+          <li><strong>Meat &amp; poultry:</strong> beef through/no pink (Mon), pork to 145&deg;F + rest (Tue), drumsticks to 175&deg;F (Thu).</li>
+          <li><strong>Cheese:</strong> cotija must be pasteurized (or sub/skip); mozzarella pasteurized and melted.</li>
+          <li><strong>No alcohol</strong> in any of these dishes.</li>
+          <li><strong>Wash produce</strong> well, especially the tomatoes and herbs.</li>
+          <li><strong>No seafood</strong> this week &mdash; per the aversion.</li>
+        </ul>
+        <p style="color:var(--ink-soft);font-size:12px;font-style:italic;margin-top:10px">General guidance, not medical advice &mdash; defer to your OB/midwife.</p>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Managing the nausea / aversion</h3>
+        <ul>
+          <li>Friday's gnocchi is the mildest, lowest-aroma night &mdash; move it earlier in the week if a bland meal is what sounds doable.</li>
+          <li>Cooking smells are often the worst part &mdash; let the non-pregnant adult sear the beef and pork and brown the drumsticks; open a window or run the vent.</li>
+          <li>Room-temp or cool leftovers smell much less than hot food.</li>
+          <li>Plain carbs (rice, gnocchi) and cold, tart, or ginger-forward things tend to sit better; keep easy snacks on hand.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Working with the kids</h3>
+        <ul>
+          <li><strong>Mon (beef bowls):</strong> tender beef over soft rice; rinse a piece or set aside a portion before the spicier marinade for the 13-mo; cut small.</li>
+          <li><strong>Tue (pork chops):</strong> 4 chipotles is moderate heat &mdash; set aside plain browned pork or blend a chile-free sauce portion for the kids; cut off the bone.</li>
+          <li><strong>Thu (drumsticks):</strong> go light on the chilies for a kid batch; pull meat off the bones; keep garnish walnuts off kid plates.</li>
+          <li><strong>Fri (gnocchi):</strong> a reliable hit; halve/quarter gnocchi and tomatoes for the 13-mo.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section">
+        <h3>Substitutions, if Fresh is missing something</h3>
+        <ul>
+          <li><strong>Short ribs (Mon):</strong> skirt or hanger steak, sliced thin, works just as well.</li>
+          <li><strong>Pork chops (Tue):</strong> &frac34;&ndash;1" chops work &mdash; brown both sides and simmer 7&ndash;9 min. Boneless loin chops also fine.</li>
+          <li><strong>Cotija (Tue):</strong> pasteurized queso fresco or feta, or leave it off.</li>
+          <li><strong>Pomegranate molasses (Thu):</strong> 2 Tbsp balsamic + 1 tsp honey approximates the sweet-tart note.</li>
+          <li><strong>Drumsticks (Thu):</strong> bone-in thighs are the original; either way cook dark meat to 175&deg;F.</li>
+          <li><strong>Gnocchi (Fri):</strong> shelf-stable or refrigerated both work; cauliflower gnocchi also crisps well.</li>
+          <li><strong>Serranos (Thu):</strong> jalape&ntilde;o (milder) or omit for no heat.</li>
+        </ul>
+      </div>
+
+      <div class="pantry-section" style="grid-column: 1 / -1;">
+        <h3>For next week</h3>
+        <p style="color:var(--ink-soft);font-size:13.5px">Tell me:</p>
+        <ul>
+          <li>Any perishables to use up (likely: cilantro, basil, leftover chipotles in adobo, limes, celery)</li>
+          <li>How the aversions are tracking &mdash; whether seafood is still out, and whether any other smells or foods have become triggers (meat, onions, and coffee are common ones)</li>
+          <li>Kid wins / refusals</li>
+          <li>How many nights you need, and any ingredients to use up</li>
+          <li>Specific Amazon Fresh deals you saw</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t === tab));
+      document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    });
+  });
+  document.querySelectorAll('.recipe-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.recipe;
+      document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n === item));
+      document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === target));
+    });
+  });
+  function goToRecipe(idx) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'recipes'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.dataset.panel === 'recipes'));
+    document.querySelectorAll('.recipe-nav-item').forEach(n => n.classList.toggle('active', n.dataset.recipe === String(idx)));
+    document.querySelectorAll('.recipe').forEach(r => r.classList.toggle('active', r.dataset.recipe === String(idx)));
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+  document.querySelectorAll('.grocery-section li').forEach(li => {
+    if (li.querySelector('.check-box')) {
+      li.addEventListener('click', () => li.classList.toggle('checked'));
+    }
+  });
+  function logPerishables() {
+    const txt = document.getElementById('perishables').value.trim();
+    const out = document.getElementById('perish-out');
+    if (!txt) { out.textContent = ''; return; }
+    out.innerHTML = '<strong>Noted:</strong> ' + txt.replace(/\n/g, '<br>') + '<br><br><em>Bring this to next week\'s planning conversation and I\'ll work these into the recipes.</em>';
+  }
+</script>
